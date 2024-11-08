@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "385397242544",
+    "project_id": "joby-eee06",
+    "storage_bucket": "joby-eee06.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:385397242544:android:5e07ca7030f38bb0bf5975",
+        "android_client_info": {
+          "package_name": "com.joby.loby"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "385397242544-riveubtjlqgn93s31smuq6ho3s5ne5jn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCuxpkqIBJ9h6m83fOYZSX3ZTjFqRPLL3g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "385397242544-riveubtjlqgn93s31smuq6ho3s5ne5jn.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "385397242544-e8kiepodl5hfhlmg6egj01j2ji3t81k6.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.joby.loby"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
