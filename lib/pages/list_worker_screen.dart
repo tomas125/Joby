@@ -1,31 +1,28 @@
 import 'package:flutter/material.dart';
-import 'worker.dart';
+import '../services/worker_service.dart';
+import '../models/worker_model.dart';
 
-class WorkerResultsScreen extends StatefulWidget {
-  final List<Worker> workers;
+class ListWorkerScreen extends StatefulWidget {
+  final String selectedType;
 
-  WorkerResultsScreen({required this.workers});
+  ListWorkerScreen({required this.selectedType});
 
   @override
-  _WorkerResultsScreenState createState() => _WorkerResultsScreenState();
+  _ListWorkerScreenState createState() => _ListWorkerScreenState();
 }
 
-class _WorkerResultsScreenState extends State<WorkerResultsScreen> {
+class _ListWorkerScreenState extends State<ListWorkerScreen> {
+  final WorkerService _workerService = WorkerService();
   String searchQuery = '';
   String filterType = 'Todos';
 
   @override
   Widget build(BuildContext context) {
-    List<Worker> filteredWorkers = widget.workers.where((worker) {
-      return worker.name.toLowerCase().contains(searchQuery.toLowerCase()) &&
-          (filterType == 'Todos' || worker.type == filterType);
-    }).toList();
-
     return Scaffold(
       backgroundColor: const Color(0xFFD4451A),
       appBar: AppBar(
         backgroundColor: const Color(0xFFD4451A),
-        title: Text('Trabajadores Disponibles',
+        title: Text('Trabajadores disponibles',
             style: TextStyle(color: const Color(0xFFE2E2E2))),
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: const Color(0xFFE2E2E2)),
@@ -36,8 +33,36 @@ class _WorkerResultsScreenState extends State<WorkerResultsScreen> {
         children: [
           _buildSearchField(),
           _buildFilterButtons(),
-          _buildWorkerCount(filteredWorkers),
-          Expanded(child: _buildWorkerList(filteredWorkers)),
+          Expanded(
+            child: StreamBuilder<List<WorkerModel>>(
+              stream: widget.selectedType.isEmpty 
+                  ? _workerService.getWorkers()
+                  : _workerService.getWorkersByType(widget.selectedType),
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                }
+
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                }
+
+                List<WorkerModel> workers = snapshot.data ?? [];
+                List<WorkerModel> filteredWorkers = workers.where((worker) {
+                  bool matchesSearch = worker.name.toLowerCase().contains(searchQuery.toLowerCase());
+                  bool matchesFilter = filterType == 'Todos' || worker.category == filterType;
+                  return matchesSearch && matchesFilter;
+                }).toList();
+
+                return Column(
+                  children: [
+                    _buildWorkerCount(filteredWorkers),
+                    Expanded(child: _buildWorkerList(filteredWorkers)),
+                  ],
+                );
+              },
+            ),
+          ),
         ],
       ),
     );
@@ -67,17 +92,20 @@ class _WorkerResultsScreenState extends State<WorkerResultsScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _buildFilterButton('Particulares'),
+        _buildFilterButton('Todos'),
         SizedBox(width: 10),
-        _buildFilterButton('Locales'),
+        _buildFilterButton('Particular'),
+        SizedBox(width: 10),
+        _buildFilterButton('Local'),
       ],
     );
   }
 
   Widget _buildFilterButton(String type) {
+    bool isSelected = filterType == type;
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: filterType == type
+        backgroundColor: isSelected
             ? const Color(0xFFF88C6A)
             : const Color(0xFFD2CACA),
         foregroundColor: const Color(0xFF343030),
@@ -88,7 +116,7 @@ class _WorkerResultsScreenState extends State<WorkerResultsScreen> {
     );
   }
 
-  Widget _buildWorkerCount(List<Worker> workers) {
+  Widget _buildWorkerCount(List<WorkerModel> workers) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Text(
@@ -98,7 +126,7 @@ class _WorkerResultsScreenState extends State<WorkerResultsScreen> {
     );
   }
 
-  Widget _buildWorkerList(List<Worker> workers) {
+  Widget _buildWorkerList(List<WorkerModel> workers) {
     return ListView.builder(
       itemCount: workers.length,
       itemBuilder: (context, index) {
@@ -110,7 +138,7 @@ class _WorkerResultsScreenState extends State<WorkerResultsScreen> {
 }
 
 class WorkerCard extends StatelessWidget {
-  final Worker worker;
+  final WorkerModel worker;
 
   const WorkerCard({Key? key, required this.worker}) : super(key: key);
 
@@ -122,16 +150,29 @@ class WorkerCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundImage: AssetImage(worker.imageUrl),
+          backgroundImage: worker.imageUrl.isNotEmpty ? NetworkImage(worker.imageUrl) : AssetImage('assets/persona2.jpg'),
         ),
-        title:
-            Text(worker.name, style: TextStyle(color: const Color(0xFF343030))),
-        subtitle: Text('${worker.rating} ★',
-            style: TextStyle(color: const Color(0xFF343030))),
+        title: Text(
+          worker.name,
+          style: TextStyle(color: const Color(0xFF343030)),
+        ),
+        subtitle: Row(
+          children: [
+            Text(
+              '${worker.rating} ★',
+              style: TextStyle(color: const Color(0xFF343030)),
+            ),
+            SizedBox(width: 8),
+            Text(
+              worker.category,
+              style: TextStyle(color: const Color(0xFF343030)),
+            ),
+          ],
+        ),
         onTap: () {
           Navigator.pushNamed(
             context,
-            '/worker_profile',
+            '/profile/worker',
             arguments: worker,
           );
         },

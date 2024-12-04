@@ -1,9 +1,9 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
-class PreferenciasUsuario {
+class UserPreference {
   static late SharedPreferences _prefs;
-  static const String _keyUltimaPagina = 'ultimaPagina';
-  static const String _defaultPagina = 'Login';
+  static const String _keyLastPage = 'lastPage';
+  static const String _defaultPage = 'Login';
   static const String _keyIsLoggedIn = 'isLoggedIn';
   static const String _keyUserEmail = 'userEmail';
 
@@ -16,22 +16,22 @@ class PreferenciasUsuario {
   }
 
   /// Obtiene la última página visitada
-  static String get ultimaPagina {
+  static String get lastPage {
     _checkInitialized();
-    return _prefs.getString(_keyUltimaPagina) ?? _defaultPagina;
+    return _prefs.getString(_keyLastPage) ?? _defaultPage;
   }
 
   /// Establece la última página visitada
-  static Future<void> setUltimaPagina(String value) async {
+  static Future<void> setLastPage(String value) async {
     _checkInitialized();
-    await _prefs.setString(_keyUltimaPagina, value);
+    await _prefs.setString(_keyLastPage, value);
   }
 
   /// Verifica si las preferencias han sido inicializadas
   static void _checkInitialized() {
     if (!_initialized) {
       throw Exception(
-          'PreferenciasUsuario no ha sido inicializado. Debes llamar a PreferenciasUsuario.init() antes de usar cualquier método.');
+          'UserPreference no ha sido inicializado. Debes llamar a UserPreference.init() antes de usar cualquier método.');
     }
   }
 

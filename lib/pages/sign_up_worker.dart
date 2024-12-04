@@ -1,30 +1,32 @@
-import 'package:Joby/util/snackbar.dart';
+import 'package:Joby/utils/snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class WorkerRequestScreen extends StatelessWidget {
-  const WorkerRequestScreen({Key? key}) : super(key: key);
+class SignUpWorkerScreen extends StatelessWidget {
+  const SignUpWorkerScreen({Key? key}) : super(key: key);
 
   void _launchWhatsApp(BuildContext context) async {
-    // Agregar 'BuildContext context' como parámetro
-    const phoneNumber =
-        '+1234567890'; // Reemplaza con el número de WhatsApp correcto
-    const message =
-        'Hola, me gustaría unirme como trabajador en la aplicación.';
-    final url = Uri.parse(
+    const phoneNumber = '+5493364179227';
+    const message = 'Hola, estoy interesado en formar parte del equipo de trabajadores de Joby. ¿Podrías brindarme más información? ¡Gracias!';
+    
+    final whatsappUrl = Uri.parse(
+        'whatsapp://send?phone=$phoneNumber&text=${Uri.encodeFull(message)}');
+    final webWhatsappUrl = Uri.parse(
         'https://wa.me/$phoneNumber/?text=${Uri.encodeFull(message)}');
 
     try {
-      if (await canLaunchUrl(url)) {
-        await launchUrl(url, mode: LaunchMode.externalApplication);
+      if (await canLaunchUrl(whatsappUrl)) {
+        await launchUrl(whatsappUrl);
+      } else if (await canLaunchUrl(webWhatsappUrl)) {
+        await launchUrl(webWhatsappUrl);
       } else {
         throw 'No se pudo abrir WhatsApp.';
       }
     } catch (e) {
-      // Maneja el error, por ejemplo, mostrando un SnackBar
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al abrir WhatsApp: $e')),
-      ); // Agregar 'context' como parámetro a la función
+      SnackBarUtil.showError(
+        context: context,
+        message: 'Error: $e',
+      );
     }
   }
 
@@ -40,7 +42,7 @@ class WorkerRequestScreen extends StatelessWidget {
         backgroundColor: const Color(0xFFD4451A),
         leading: IconButton(
           icon: Icon(Icons.arrow_back,
-              color: const Color(0xFFE2E2E2)), // Cambiar color aquí
+              color: const Color(0xFFE2E2E2)),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -65,7 +67,7 @@ class WorkerRequestScreen extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 40),
-            _buildRequestButton(context), // Agregar 'context' como parámetro
+            _buildRequestButton(context),
           ],
         ),
       ),
@@ -73,19 +75,15 @@ class WorkerRequestScreen extends StatelessWidget {
   }
 
   ElevatedButton _buildRequestButton(BuildContext context) {
-    // Agregar 'BuildContext context' como parámetro
     return ElevatedButton(
-      onPressed: () => SnackBarUtil.show(
-        context: context,
-        message: 'No disponible por el momento',
-      ), // Pasar 'context' a la función
+      onPressed: () => _launchWhatsApp(context),
       style: ElevatedButton.styleFrom(
-        foregroundColor: const Color(0xFF343030), // Cambiar color del texto
-        backgroundColor: const Color(0xFFD2CACA), // Color de fondo del botón
-        fixedSize: const Size(200, 45), // Tamaño fijo para el botón
+        foregroundColor: const Color(0xFF343030),
+        backgroundColor: const Color(0xFFD2CACA),
+        fixedSize: const Size(200, 80),
         textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(25), // Bordes redondeados
+          borderRadius: BorderRadius.circular(25),
         ),
       ),
       child: Text('Solicitar'),

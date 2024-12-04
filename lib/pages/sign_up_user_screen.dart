@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:Joby/util/snackbar.dart';
+import 'package:Joby/utils/snackbar.dart';
 import 'package:Joby/utils/auth.dart';
+import 'dart:developer' as developer;
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:Joby/preferences/pref_user.dart';
 
-// ... importaciones existentes ...
-
-class RegistroClientes extends StatefulWidget {
-  static const String routeName = '/register';
+class SignUpUserScreen extends StatefulWidget {
+  static const String routeName = '/signup/user';
 
   @override
-  _RegistroClientesState createState() => _RegistroClientesState();
+  _SignUpUserScreenState createState() => _SignUpUserScreenState();
 }
 
-class _RegistroClientesState extends State<RegistroClientes> {
+class _SignUpUserScreenState extends State<SignUpUserScreen> {
   final AuthService _auth = AuthService();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -44,7 +45,7 @@ class _RegistroClientesState extends State<RegistroClientes> {
                 SizedBox(height: 16.0),
                 _buildPasswordField(),
                 SizedBox(height: 16.0),
-                _buildRegisterButton(),
+                _buildSignUpButton(),
                 SizedBox(height: 16.0),
                 _buildGoogleButton(),
                 SizedBox(height: 8.0),
@@ -110,7 +111,7 @@ class _RegistroClientesState extends State<RegistroClientes> {
     );
   }
 
-  ElevatedButton _buildRegisterButton() {
+  ElevatedButton _buildSignUpButton() {
     return ElevatedButton(
       onPressed: _handleRegister,
       style: ElevatedButton.styleFrom(
@@ -179,12 +180,40 @@ class _RegistroClientesState extends State<RegistroClientes> {
           message: 'Error, email ya está en uso',
         );
       } else {
-        Navigator.pushNamed(context, '/service_selection');
+        Navigator.pushNamed(context, '/list/areas');
       }
     }
   }
 
   Future<void> _handleGoogleRegister() async {
-    // Implementar registro de usuario con Google
+    try {
+      developer.log('Iniciando proceso de login con Google');
+      
+      final result = await _auth.signInWithGoogle();
+
+      if (result.success) {
+        developer.log('Login con Google exitoso');
+        await UserPreference.setLoggedIn(true);
+        
+        final currentUser = FirebaseAuth.instance.currentUser;
+        if (currentUser?.email != null) {
+          await UserPreference.setUserEmail(currentUser!.email!);
+        }
+        
+        Navigator.pushReplacementNamed(context, '/list/areas');
+      } else {
+        developer.log('Error en login con Google: ${result.errorMessage}');
+        SnackBarUtil.showError(
+          context: context,
+          message: result.errorMessage ?? 'Error al iniciar sesión con Google',
+        );
+      }
+    } catch (e) {
+      developer.log('Excepción durante el login con Google: $e');
+      SnackBarUtil.showError(
+        context: context,
+        message: 'Error inesperado al iniciar sesión con Google: $e',
+      );
+    }
   }
 }

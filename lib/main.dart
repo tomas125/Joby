@@ -1,22 +1,33 @@
-import 'package:Joby/pages/worker_request.dart';
+import 'package:Joby/pages/sign_up_worker.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
-import 'pages/login_pages.dart';
-import 'pages/register_screen.dart';
-import 'pages/selection_screen.dart';
-import 'pages/service_selection_screen.dart';
-import 'pages/worker_results_screen.dart';
-import 'pages/worker_profile_screen.dart';
-import 'pages/worker.dart';
-import 'preferences/pref_usuarios.dart';
+import 'utils/firebase_config.dart';
+import 'pages/login_screen.dart';
+import 'pages/sign_up_user_screen.dart';
+import 'pages/home_screen.dart';
+import 'pages/list_area_screen.dart';
+import 'pages/list_worker_screen.dart';
+import 'pages/profile_worker_screen.dart';
+import 'preferences/pref_user.dart';
+import 'pages/admin/home_admin_screen.dart';
+import 'pages/admin/worker_form_admin_screen.dart';
+import 'utils/auth.dart';
+import 'models/worker_model.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  await PreferenciasUsuario.init();
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    if (e.toString().contains('duplicate-app')) {
+      print('Firebase iniatilized already');
+    } else {
+      rethrow;
+    }
+  }
+  await UserPreference.init();
   runApp(const MyApp());
 }
 
@@ -32,15 +43,52 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.orange,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: PreferenciasUsuario.isLoggedIn
-          ? ServiceSelectionScreen()
-          : SelectionScreen(),
+      home: FutureBuilder<dynamic>(
+        future: AuthService().checkCurrentUser(),
+        builder: (context, userSnapshot) {
+          if (userSnapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+          
+          final user = userSnapshot.data;
+          if (user) {
+            return FutureBuilder<bool>(
+              future: AuthService().isAdmin(),
+              builder: (context, adminSnapshot) {
+                if (adminSnapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                }
+                if (adminSnapshot.hasError) {
+                  return Center(child: Text('Error: ${adminSnapshot.error}'));
+                }
+                if (adminSnapshot.data == true) {
+                  return HomeAdminScreen();
+                } else {
+                  return ListAreaScreen();
+                }
+              },
+            );
+          } else {
+            return HomeScreen();
+          }
+        },
+      ),
       routes: {
-        '/init': (context) => SelectionScreen(),
-        '/login': (context) => LoginPages(),
-        '/register': (context) => RegistroClientes(),
-        '/service_selection': (context) => ServiceSelectionScreen(),
-        '/worker_request': (context) => WorkerRequestScreen()
+        '/home': (context) => HomeScreen(),
+        '/login': (context) => LoginScreen(),
+        '/signup/user': (context) => SignUpUserScreen(),
+        '/signup/worker': (context) => SignUpWorkerScreen(),
+        '/list/areas': (context) => ListAreaScreen(),
+        '/list/workers': (context) {
+          final String selectedType = ModalRoute.of(context)?.settings.arguments as String? ?? '';
+          return ListWorkerScreen(selectedType: selectedType);
+        },
+        '/profile/worker': (context) {
+          final WorkerModel worker = ModalRoute.of(context)?.settings.arguments as WorkerModel;
+          return ProfileWorkerScreen(worker: worker);
+        },
+        '/admin/home': (context) => HomeAdminScreen(),
+        '/admin/form/worker': (context) => WorkerFormAdminScreen(),
       },
       onGenerateRoute: _generateRoute,
     );
@@ -48,15 +96,15 @@ class MyApp extends StatelessWidget {
 
   Route<dynamic>? _generateRoute(RouteSettings settings) {
     switch (settings.name) {
-      case '/worker_results':
-        final workers = settings.arguments as List<Worker>;
+      case '/list/workers':
+        final String selectedType = settings.arguments as String? ?? '';
         return MaterialPageRoute(
-          builder: (context) => WorkerResultsScreen(workers: workers),
+          builder: (context) => ListWorkerScreen(selectedType: selectedType),
         );
-      case '/worker_profile':
-        final worker = settings.arguments as Worker;
+      case '/profile/worker':
+        final worker = settings.arguments as WorkerModel;
         return MaterialPageRoute(
-          builder: (context) => WorkerProfileScreen(worker: worker),
+          builder: (context) => ProfileWorkerScreen(worker: worker),
         );
       default:
         return null;

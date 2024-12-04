@@ -2,7 +2,7 @@
   "project_info": {
     "project_number": "385397242544",
     "project_id": "joby-eee06",
-    "storage_bucket": "joby-eee06.appspot.com"
+    "storage_bucket": "joby-eee06.firebasestorage.app"
   },
   "client": [
     {
@@ -13,6 +13,14 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "385397242544-jp2ab55u5ccn980sqne5aojjktt4sfor.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.joby.loby",
+            "certificate_hash": "0148f71385fccf3be9225fd31fc509a137dfeeb7"
+          }
+        },
         {
           "client_id": "385397242544-riveubtjlqgn93s31smuq6ho3s5ne5jn.apps.googleusercontent.com",
           "client_type": 3

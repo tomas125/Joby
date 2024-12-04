@@ -37,7 +37,9 @@ dependencies:
   firebase_core: ^3.3.0  
   shared_preferences: ^2.3.2
   flutter_launcher_icons: ^0.9.2
-  url_launcher: ^6.1.10  # Usa la última versión disponible
+  url_launcher: ^6.1.10
+  google_sign_in: ^6.1.6
+  cloud_firestore: ^5.5.0
 
   
 
@@ -66,8 +68,11 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/icon/jobyparalogo.png
     - assets/
+    - assets/icon/jobyparalogo.png
+    - assets/anuncio-1.png
+    - assets/anuncio-2.png
+    - assets/persona2.jpg
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
