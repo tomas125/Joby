@@ -57,6 +57,10 @@ class _AreaFormAdminScreenState extends State<AreaFormAdminScreen> {
             ElevatedButton(
               onPressed: _saveArea,
               child: Text('Guardar'),
+              style: TextButton.styleFrom(
+                backgroundColor: const Color(0xFFD4451A),
+                foregroundColor: Colors.white,
+              ),
             ),
           ],
         ),

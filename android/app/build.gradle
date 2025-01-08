@@ -38,6 +38,12 @@ android {
             keyAlias "androiddebugkey"
             keyPassword "android"
         }
+        release {
+            storeFile file("C:/Users/Ivan/key.jks")
+            storePassword "J0b1.2024"
+            keyAlias "key"
+            keyPassword "J0b1.2024"
+        }
     }
 
     compileOptions {
@@ -55,8 +61,13 @@ android {
     }
 
     buildTypes {
-        release {
+        debug {
             signingConfig signingConfigs.debug
+        }
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled false
+            shrinkResources false
         }
     }
 }

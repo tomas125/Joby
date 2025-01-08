@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../models/worker_model.dart';
 import '../../services/worker_service.dart';
 import '../../services/area_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class WorkerFormAdminScreen extends StatefulWidget {
   final WorkerModel? worker;
@@ -17,30 +18,16 @@ class _WorkerFormAdminScreenState extends State<WorkerFormAdminScreen> {
   final _formKey = GlobalKey<FormState>();
   final _workerService = WorkerService();
   final _areaService = AreaService();
-  String? _selectedAreaId;
+  final List<String> _selectedAreaIds = [];
 
   late TextEditingController _nameController;
   late TextEditingController _imageUrlController;
   late TextEditingController _descriptionController;
   late TextEditingController _phoneController;
   late TextEditingController _emailController;
-  String _selectedType = 'Electricista';
   String _selectedCategory = 'Particular';
   double _rating = 0.0;
   bool _isAvailable = true;
-
-  final List<String> jobTypes = [
-    'Electricista',
-    'Plomero',
-    'Albañil',
-    'Jardinero',
-    'Pintor',
-    'Carpintero',
-    'Limpiador',
-    'Mudanza',
-    'Técnico',
-    'Cuidador',
-  ];
 
   @override
   void initState() {
@@ -53,7 +40,10 @@ class _WorkerFormAdminScreenState extends State<WorkerFormAdminScreen> {
     _selectedCategory = widget.worker?.category ?? 'Particular';
     _rating = widget.worker?.rating ?? 0.0;
     _isAvailable = widget.worker?.isAvailable ?? true;
-    _selectedType = widget.worker?.type ?? 'Electricista';
+    
+    if (widget.worker != null) {
+      _selectedAreaIds.addAll(widget.worker!.areaIds);
+    }
   }
 
   @override
@@ -81,20 +71,6 @@ class _WorkerFormAdminScreenState extends State<WorkerFormAdminScreen> {
               decoration: InputDecoration(labelText: 'Teléfono'),
               validator: (value) => value?.isEmpty ?? true ? 'Campo requerido' : null,
             ),
-            DropdownButtonFormField<String>(
-              value: _selectedType,
-              items: jobTypes.map((String type) {
-                return DropdownMenuItem(
-                  value: type,
-                  child: Text(type),
-                );
-              }).toList(),
-              onChanged: (String? value) {
-                setState(() => _selectedType = value ?? 'Electricista');
-              },
-              decoration: InputDecoration(labelText: 'Tipo de trabajo'),
-              validator: (value) => value == null ? 'Campo requerido' : null,
-            ),
             TextFormField(
               controller: _imageUrlController,
               decoration: InputDecoration(labelText: 'URL de imagen'),
@@ -116,54 +92,25 @@ class _WorkerFormAdminScreenState extends State<WorkerFormAdminScreen> {
               controller: _descriptionController,
               decoration: InputDecoration(labelText: 'Descripción'),
             ),
-            Slider(
-              value: _rating,
-              min: 0,
-              max: 5,
-              divisions: 10,
-              label: _rating.toString(),
-              onChanged: (value) {
-                setState(() => _rating = value);
-              },
-            ),
+            SizedBox(height: 16.0),
+            _buildAreaSelector(),
+            SizedBox(height: 8.0),
             SwitchListTile(
               title: Text('Disponible'),
+              activeColor: Color(0xFFD4451A),
               value: _isAvailable,
               onChanged: (bool value) {
                 setState(() => _isAvailable = value);
               },
             ),
-            StreamBuilder<List<AreaModel>>(
-              stream: _areaService.getAreas(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return CircularProgressIndicator();
-                }
-
-                return DropdownButtonFormField<String>(
-                  value: _selectedAreaId,
-                  decoration: InputDecoration(
-                    labelText: 'Servicio',
-                  ),
-                  items: snapshot.data!.map((area) {
-                    return DropdownMenuItem(
-                      value: area.id,
-                      child: Text(area.name),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedAreaId = value;
-                    });
-                  },
-                  validator: (value) =>
-                      value == null ? 'Por favor seleccione un servicio' : null,
-                );
-              },
-            ),
+            SizedBox(height: 8.0),
             ElevatedButton(
               onPressed: _saveWorker,
               child: Text('Guardar'),
+              style: TextButton.styleFrom(
+                backgroundColor: const Color(0xFFD4451A),
+                foregroundColor: Colors.white,
+              ),
             ),
           ],
         ),
@@ -171,20 +118,59 @@ class _WorkerFormAdminScreenState extends State<WorkerFormAdminScreen> {
     );
   }
 
+  Widget _buildAreaSelector() {
+    return StreamBuilder<List<AreaModel>>(
+      stream: _areaService.getAreas(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return CircularProgressIndicator();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Áreas de trabajo'),
+            if (_selectedAreaIds.isEmpty)
+              Text(
+                'Debe seleccionar al menos un área',
+                style: TextStyle(color: Colors.red, fontSize: 12),
+              ),
+            Wrap(
+              spacing: 8.0,
+              children: snapshot.data!.map((area) {
+                return FilterChip(
+                  label: Text(area.name),
+                  selected: _selectedAreaIds.contains(area.id),
+                  onSelected: (selected) {
+                    setState(() {
+                      if (selected) {
+                        _selectedAreaIds.add(area.id);
+                      } else {
+                        _selectedAreaIds.remove(area.id);
+                      }
+                    });
+                  },
+                );
+              }).toList(),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _saveWorker() async {
-    if (_formKey.currentState!.validate() && _selectedAreaId != null) {
+    if (_formKey.currentState!.validate() && _selectedAreaIds.isNotEmpty) {
       final worker = WorkerModel(
         id: widget.worker?.id ?? '',
         name: _nameController.text,
-        type: _selectedType, // Usar el tipo seleccionado
         imageUrl: _imageUrlController.text,
         rating: _rating,
         description: _descriptionController.text,
         phone: _phoneController.text,
         email: _emailController.text,
         category: _selectedCategory,
+        areaIds: _selectedAreaIds,
+        location: const GeoPoint(0, 0),
         isAvailable: _isAvailable,
-        areaId: _selectedAreaId!,
       );
 
       try {

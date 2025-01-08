@@ -27,4 +27,12 @@ class AreaService {
   Future<void> deleteArea(String areaId) async {
     await _areasCollection.doc(areaId).delete();
   }
+
+  Stream<String> getAreaIdByName(String areaName) {
+    return FirebaseFirestore.instance
+        .collection('areas')
+        .where('name', isEqualTo: areaName)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.first.id);
+  }
 } 

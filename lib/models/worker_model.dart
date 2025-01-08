@@ -1,27 +1,29 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class WorkerModel {
   final String id;
   final String name;
-  final String type;
   final String imageUrl;
   final double rating;
   final String description;
   final String phone;
   final String email;
-  final String category; // 'Particular' o 'Local'
+  final String category;
   final bool isAvailable;
-  final String areaId;
+  final List<String> areaIds;
+  final GeoPoint location;
 
   WorkerModel({
     required this.id,
     required this.name,
-    required this.type,
     required this.imageUrl,
     required this.rating,
     required this.description,
     required this.phone,
     required this.email,
     required this.category,
-    required this.areaId,
+    required this.areaIds,
+    required this.location,
     this.isAvailable = true,
   });
 
@@ -29,8 +31,7 @@ class WorkerModel {
     return WorkerModel(
       id: id,
       name: data['name'] ?? '',
-      type: data['type'] ?? '',
-      imageUrl: data['imageUrl'] ?? 'assets/persona2.jpg',
+      imageUrl: data['imageUrl'] ?? '',
       rating: (data['rating'] is String) 
           ? double.tryParse(data['rating']) ?? 0.0
           : (data['rating'] ?? 0).toDouble(),
@@ -38,7 +39,8 @@ class WorkerModel {
       phone: data['phone'] ?? '',
       email: data['email'] ?? '',
       category: data['category'] ?? 'Particular',
-      areaId: data['areaId'] ?? '',
+      areaIds: List<String>.from(data['areaIds'] ?? []),
+      location: data['location'] ?? const GeoPoint(0, 0),
       isAvailable: data['isAvailable'] ?? true,
     );
   }
@@ -46,14 +48,14 @@ class WorkerModel {
   Map<String, dynamic> toFirestore() {
     return {
       'name': name,
-      'type': type,
       'imageUrl': imageUrl,
       'rating': rating,
       'description': description,
       'phone': phone,
       'email': email,
       'category': category,
-      'areaId': areaId,
+      'areaIds': areaIds,
+      'location': location,
       'isAvailable': isAvailable,
     };
   }

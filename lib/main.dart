@@ -11,6 +11,8 @@ import 'pages/profile_worker_screen.dart';
 import 'preferences/pref_user.dart';
 import 'pages/admin/home_admin_screen.dart';
 import 'pages/admin/worker_form_admin_screen.dart';
+import 'pages/admin/area_form_admin_screen.dart';
+import 'pages/admin/advertisement_form_screen.dart';
 import 'utils/auth.dart';
 import 'models/worker_model.dart';
 
@@ -46,8 +48,14 @@ class MyApp extends StatelessWidget {
       home: FutureBuilder<dynamic>(
         future: AuthService().checkCurrentUser(),
         builder: (context, userSnapshot) {
+          if (userSnapshot.hasError) {
+            return Center(child: Text('Error: ${userSnapshot.error}'));
+          }
+          
           if (userSnapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
           }
           
           final user = userSnapshot.data;
@@ -56,21 +64,18 @@ class MyApp extends StatelessWidget {
               future: AuthService().isAdmin(),
               builder: (context, adminSnapshot) {
                 if (adminSnapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
+                  return const Scaffold(
+                    body: Center(child: CircularProgressIndicator()),
+                  );
                 }
-                if (adminSnapshot.hasError) {
-                  return Center(child: Text('Error: ${adminSnapshot.error}'));
-                }
-                if (adminSnapshot.data == true) {
-                  return HomeAdminScreen();
-                } else {
-                  return ListAreaScreen();
-                }
+                return adminSnapshot.data == true 
+                    ? HomeAdminScreen()
+                    : ListAreaScreen();
               },
             );
-          } else {
-            return HomeScreen();
           }
+          
+          return HomeScreen();
         },
       ),
       routes: {
@@ -80,8 +85,8 @@ class MyApp extends StatelessWidget {
         '/signup/worker': (context) => SignUpWorkerScreen(),
         '/list/areas': (context) => ListAreaScreen(),
         '/list/workers': (context) {
-          final String selectedType = ModalRoute.of(context)?.settings.arguments as String? ?? '';
-          return ListWorkerScreen(selectedType: selectedType);
+          final String selectedAreaId = ModalRoute.of(context)?.settings.arguments as String? ?? '';
+          return ListWorkerScreen(selectedAreaId: selectedAreaId);
         },
         '/profile/worker': (context) {
           final WorkerModel worker = ModalRoute.of(context)?.settings.arguments as WorkerModel;
@@ -89,6 +94,8 @@ class MyApp extends StatelessWidget {
         },
         '/admin/home': (context) => HomeAdminScreen(),
         '/admin/form/worker': (context) => WorkerFormAdminScreen(),
+        '/admin/form/area': (context) => AreaFormAdminScreen(),
+        '/admin/form/advertisement': (context) => AdvertisementFormScreen(),
       },
       onGenerateRoute: _generateRoute,
     );
@@ -97,9 +104,9 @@ class MyApp extends StatelessWidget {
   Route<dynamic>? _generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case '/list/workers':
-        final String selectedType = settings.arguments as String? ?? '';
+        final String selectedAreaId = settings.arguments as String? ?? '';
         return MaterialPageRoute(
-          builder: (context) => ListWorkerScreen(selectedType: selectedType),
+          builder: (context) => ListWorkerScreen(selectedAreaId: selectedAreaId),
         );
       case '/profile/worker':
         final worker = settings.arguments as WorkerModel;

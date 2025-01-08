@@ -4,6 +4,10 @@ import 'package:Joby/preferences/pref_user.dart';
 import 'dart:async';
 import '../services/area_service.dart';
 import '../models/area_model.dart';
+import '../services/advertisement_service.dart';
+import '../models/advertisement_model.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 
 class ListAreaScreen extends StatefulWidget {
   static const String routeName = '/list_area';
@@ -14,6 +18,8 @@ class ListAreaScreen extends StatefulWidget {
 
 class _ListAreaScreenState extends State<ListAreaScreen> {
   final AreaService _areaService = AreaService();
+  final AdvertisementService _adService = AdvertisementService();
+  List<AdvertisementModel> _cachedAds = [];
   String searchQuery = '';
   PageController _pageController = PageController();
   Timer? _timer;
@@ -22,56 +28,101 @@ class _ListAreaScreenState extends State<ListAreaScreen> {
   @override
   void initState() {
     super.initState();
-    _startAutoScroll();
+    _loadAds();
   }
 
-  @override
-  void dispose() {
-    _timer?.cancel();
-    _pageController.dispose();
-    super.dispose();
+  void _loadAds() async {
+    // Cargar anuncios una sola vez y mantenerlos en caché
+    _adService.getAdvertisements().listen((ads) {
+      if (!listEquals(_cachedAds, ads)) {
+        setState(() {
+          _cachedAds = ads;
+          if (_timer == null || !_timer!.isActive) {
+            _startAutoScroll();
+          }
+        });
+      }
+    });
   }
 
   void _startAutoScroll() {
-    _timer = Timer.periodic(Duration(seconds: 6), (timer) {
-      if (_currentPage < 1) {
-        _currentPage++;
-      } else {
-        _currentPage = 0;
+    _timer?.cancel();
+    _timer = Timer.periodic(Duration(seconds: 4), (timer) {
+      if (_pageController.hasClients && _cachedAds.length > 1) {
+        final nextPage = (_currentPage + 1) % _cachedAds.length;
+        _pageController.animateToPage(
+          nextPage,
+          duration: Duration(milliseconds: 400),
+          curve: Curves.easeInOut,
+        );
       }
-      _pageController.animateToPage(
-        _currentPage,
-        duration: Duration(milliseconds: 800),
-        curve: Curves.easeInOut,
-      );
     });
+  }
+
+  Future<bool> _onWillPop() async {
+    final shouldPop = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Saliendo de la aplicación'),
+        content: Text('¿Estás seguro que deseas salir?'),
+        actions: [
+          TextButton(
+            child: Text('No'),
+            style: TextButton.styleFrom(
+              foregroundColor: const Color(0xFF343030),
+            ),
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+          TextButton(
+            child: Text('Sí'),
+            style: TextButton.styleFrom(
+              backgroundColor: const Color(0xFFD4451A),
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.of(context).pop(true),
+          ),
+        ],
+      ),
+    ) ?? false;
+
+    if (shouldPop) {
+      // Salir de la aplicación
+      return true;
+    }
+    return false;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFD4451A),
-      appBar: AppBar(
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) async {
+        if (didPop) return;
+        final result = await _onWillPop();
+        if (result && context.mounted) {
+          SystemNavigator.pop();  // Cierra la app
+        }
+      },
+      child: Scaffold(
         backgroundColor: const Color(0xFFD4451A),
-        title: Text('¿Qué servicio estás buscando?',
-            style: TextStyle(color: const Color(0xFFE2E2E2))),
-        automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.logout, color: const Color(0xFFE2E2E2)),
-            onPressed: () => _handleLogout(context),
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Column(
+        appBar: AppBar(
+          backgroundColor: const Color(0xFFD4451A),
+          title: Text('¿Qué servicio estás buscando?',
+              style: TextStyle(color: const Color(0xFFE2E2E2))),
+          automaticallyImplyLeading: false,
+          actions: [
+            IconButton(
+              icon: Icon(Icons.logout, color: const Color(0xFFE2E2E2)),
+              onPressed: () => _handleLogout(context),
+            ),
+          ],
+        ),
+        body: Column(
           children: [
             _buildSearchField(),
-            SizedBox(height: 8),
             _buildAdCarousel(),
-            SizedBox(height: 16),
-            Container(
-              height: MediaQuery.of(context).size.height - 300,
+            SizedBox(height: 8),
+            Expanded(
               child: _buildAreaGrid(),
             ),
           ],
@@ -101,22 +152,49 @@ class _ListAreaScreenState extends State<ListAreaScreen> {
   }
 
   Widget _buildAdCarousel() {
+    if (_cachedAds.isEmpty) {
+      return AspectRatio(
+        aspectRatio: 16 / 7,
+        child: Container(
+          margin: EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: Colors.grey[300],
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          child: Center(
+            child: Text('No hay publicidades disponibles'),
+          ),
+        ),
+      );
+    }
+
     return AspectRatio(
       aspectRatio: 16 / 7,
       child: PageView.builder(
         controller: _pageController,
-        itemCount: 2,
+        itemCount: _cachedAds.length,
+        onPageChanged: (index) {
+          _currentPage = index;
+        },
         itemBuilder: (context, index) {
           return Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(10.0),
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  Image.asset(
-                    index == 0 ? 'assets/anuncio-1.png' : 'assets/anuncio-2.png',
+                  Image.network(
+                    _cachedAds[index].imageUrl,
                     fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        color: Colors.grey[300],
+                        child: Center(
+                          child: Text('Error al cargar imagen'),
+                        ),
+                      );
+                    },
                   ),
                   Container(
                     decoration: BoxDecoration(
@@ -159,62 +237,56 @@ class _ListAreaScreenState extends State<ListAreaScreen> {
 
         return GridView.count(
           crossAxisCount: 3,
-          padding: EdgeInsets.all(16.0),
-          children: filteredAreas
-              .map((area) => _buildAreaCard(
-                  area.name,
-                    area.icon))
-              .toList(),
+          padding: EdgeInsets.all(8.0),
+          mainAxisSpacing: 8.0,
+          crossAxisSpacing: 8.0,
+          children: filteredAreas.map((area) => _buildAreaCard(area.name)).toList(),
         );
       },
     );
   }
 
-  Widget _buildAreaCard(String areaName, String icon) {
-    return GestureDetector(
-      onTap: () => Navigator.pushNamed(
-        context,
-        '/list/workers',
-        arguments: areaName,
-      ),
-      child: Card(
-        color: const Color(0xFFD2CACA),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                _getIconFromHex(icon),
-                size: 30,
-                color: const Color(0xFF343030)
+  Widget _buildAreaCard(String areaName) {
+    return StreamBuilder<String>(
+      stream: _areaService.getAreaIdByName(areaName),
+      builder: (context, snapshot) {
+        return GestureDetector(
+          onTap: () {
+            if (snapshot.hasData) {
+              Navigator.pushNamed(
+                context,
+                '/list/workers',
+                arguments: snapshot.data,
+              );
+            }
+          },
+          child: Card(
+            elevation: 4,
+            color: const Color(0xFFD2CACA),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20.0),
+            ),
+            child: Center(
+              child: Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Text(
+                  areaName,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: const Color(0xFF343030),
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
-              SizedBox(height: 10),
-              Text(
-                areaName,
-                textAlign: TextAlign.center,
-                style: TextStyle(color: const Color(0xFF343030)),
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      }
     );
   }
 
-  IconData _getIconFromHex(String hexString) {
-    try {
-      return IconData(
-        int.parse(hexString, radix: 16),
-        fontFamily: 'MaterialIcons'
-      );
-    } catch (e) {
-      return Icons.build; // Ícono por defecto si hay error
-    }
-  }
-
   void _handleLogout(BuildContext context) async {
-    // Mostrar un diálogo de confirmación
     bool confirmLogout = await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -224,10 +296,17 @@ class _ListAreaScreenState extends State<ListAreaScreen> {
           actions: <Widget>[
             TextButton(
               child: Text('Cancelar'),
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFF343030),
+              ),
               onPressed: () => Navigator.of(context).pop(false),
             ),
             TextButton(
               child: Text('Cerrar sesión'),
+              style: TextButton.styleFrom(
+                backgroundColor: const Color(0xFFD4451A),
+                foregroundColor: Colors.white,
+              ),
               onPressed: () => Navigator.of(context).pop(true),
             ),
           ],

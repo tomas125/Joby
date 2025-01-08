@@ -7,6 +7,12 @@ import 'worker_form_admin_screen.dart';
 import '../../models/area_model.dart';
 import '../../services/area_service.dart';
 import 'area_form_admin_screen.dart';
+import '../../models/advertisement_model.dart';
+import '../../services/advertisement_service.dart';
+import 'advertisement_form_screen.dart';
+import '../../models/job_model.dart';
+import '../../services/job_service.dart';
+import 'package:flutter/services.dart';
 
 class HomeAdminScreen extends StatefulWidget {
   @override
@@ -16,12 +22,15 @@ class HomeAdminScreen extends StatefulWidget {
 class _HomeAdminScreenState extends State<HomeAdminScreen> with SingleTickerProviderStateMixin {
   final WorkerService _workerService = WorkerService();
   final AreaService _areaService = AreaService();
+  final AdvertisementService _adService = AdvertisementService();
+  final JobService _jobService = JobService();
   late TabController _tabController;
+  String _selectedAreaId = '';
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
   }
 
   @override
@@ -30,96 +39,221 @@ class _HomeAdminScreenState extends State<HomeAdminScreen> with SingleTickerProv
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Panel de Administración'),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: [
-            Tab(text: 'Trabajadores'),
-            Tab(text: 'Servicios'),
-          ],
-        ),
+  Future<bool> _onWillPop() async {
+    final shouldPop = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Saliendo de la aplicación'),
+        content: Text('¿Estás seguro que deseas salir?'),
         actions: [
-          IconButton(
-            icon: Icon(Icons.logout),
-            onPressed: () => _handleLogout(context),
+          TextButton(
+            child: Text('No'),
+            style: TextButton.styleFrom(
+              foregroundColor: const Color(0xFF343030),
+            ),
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+          TextButton(
+            child: Text('Sí'),
+            style: TextButton.styleFrom(
+              backgroundColor: const Color(0xFFD4451A),
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.of(context).pop(true),
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => _tabController.index == 0 
-                ? WorkerFormAdminScreen()
-                : AreaFormAdminScreen(),
+    ) ?? false;
+
+    if (shouldPop) {
+      // Salir de la aplicación
+      return true;
+    }
+    return false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) async {
+        if (didPop) return;
+        final result = await _onWillPop();
+        if (result && context.mounted) {
+          SystemNavigator.pop();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Panel de Administración'),
+          bottom: TabBar(
+            controller: _tabController,
+            labelStyle: TextStyle(color: Color(0xFF343030)),
+            indicatorColor: Color(0xFFD4451A),
+            tabs: [
+              Tab(text: 'Trabajadores'),
+              Tab(text: 'Servicios'),
+              Tab(text: 'Publicidades'),
+              Tab(text: 'Trabajos'),
+            ],
+          ),
+          automaticallyImplyLeading: false,
+          actions: [
+            IconButton(
+              icon: Icon(Icons.logout),
+              onPressed: () => _handleLogout(context),
             ),
-          );
-        },
-        child: Icon(Icons.add),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildWorkersList(),
-          _buildAreasList(),
-        ],
+          ],
+        ),
+        floatingActionButton: _tabController.index != 3 ? FloatingActionButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) {
+                  if (_tabController.index == 0) return WorkerFormAdminScreen();
+                  if (_tabController.index == 1) return AreaFormAdminScreen();
+                  return AdvertisementFormScreen();
+                },
+              ),
+            );
+          },
+          child: Icon(Icons.add),
+          backgroundColor: Color(0xFFD4451A),
+          foregroundColor: Colors.white,
+        ) : null,
+        body: TabBarView(
+          controller: _tabController,
+          children: [
+            _buildWorkersList(),
+            _buildAreasList(),
+            _buildAdvertisementsList(),
+            _buildJobsList(),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildWorkersList() {
-    return StreamBuilder<List<WorkerModel>>(
-      stream: _workerService.getWorkers(),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        }
+    return Column(
+      children: [
+        _buildAreaDropdown(),
+        Expanded(
+          child: StreamBuilder<List<WorkerModel>>(
+            stream: _selectedAreaId.isEmpty 
+                ? _workerService.getWorkers()
+                : _workerService.getWorkersByArea(_selectedAreaId),
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              }
 
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        }
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              }
 
-        final workers = snapshot.data ?? [];
+              final workers = snapshot.data ?? [];
 
-        return ListView.builder(
-          itemCount: workers.length,
-          itemBuilder: (context, index) {
-            final worker = workers[index];
-            return ListTile(
-              leading: CircleAvatar(
-                backgroundImage: worker.imageUrl.isNotEmpty ? NetworkImage(worker.imageUrl) : AssetImage('assets/persona2.jpg'),
-              ),
-              title: Text(worker.name),
-              subtitle: Text('${worker.type} - ${worker.category}'),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.edit),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => WorkerFormAdminScreen(worker: worker),
+              return ListView.builder(
+                itemCount: workers.length,
+                itemBuilder: (context, index) {
+                  final worker = workers[index];
+                  return ListTile(
+                    leading: CircleAvatar(
+                      backgroundImage: AssetImage(
+                        worker.category == 'Local' 
+                            ? 'assets/local.jpg'
+                            : 'assets/persona.jpg'
+                      ),
+                      child: worker.imageUrl.isNotEmpty
+                          ? ClipOval(
+                              child: Image.network(
+                                worker.imageUrl,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container();
+                                },
+                              ),
+                            )
+                          : null,
+                    ),
+                    title: Text(worker.name),
+                    subtitle: Text(worker.category),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.edit),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => WorkerFormAdminScreen(worker: worker),
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    },
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.delete),
-                    onPressed: () => _showDeleteWorkerDialog(context, worker),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
+                        IconButton(
+                          icon: Icon(Icons.delete),
+                          onPressed: () => _showDeleteWorkerDialog(context, worker),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAreaDropdown() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: StreamBuilder<List<AreaModel>>(
+        stream: _areaService.getAreas(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return Container();
+          }
+
+          final areas = snapshot.data!;
+          return Container(
+            padding: EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey),
+            ),
+            child: DropdownButton<String>(
+              isExpanded: true,
+              value: _selectedAreaId.isEmpty ? null : _selectedAreaId,
+              hint: Text('Filtrar por área'),
+              underline: Container(),
+              items: [
+                DropdownMenuItem<String>(
+                  value: '',
+                  child: Text('Todos los trabajadores'),
+                ),
+                ...areas.map((area) {
+                  return DropdownMenuItem<String>(
+                    value: area.id,
+                    child: Text(area.name),
+                  );
+                }).toList(),
+              ],
+              onChanged: (value) {
+                setState(() {
+                  _selectedAreaId = value ?? '';
+                });
+              },
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -171,6 +305,115 @@ class _HomeAdminScreenState extends State<HomeAdminScreen> with SingleTickerProv
     );
   }
 
+  Widget _buildAdvertisementsList() {
+    return StreamBuilder<List<AdvertisementModel>>(
+      stream: _adService.getAdvertisements(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        final advertisements = snapshot.data ?? [];
+
+        return ListView.builder(
+          itemCount: advertisements.length,
+          itemBuilder: (context, index) {
+            final ad = advertisements[index];
+            return ListTile(
+              leading: Image.network(ad.imageUrl, width: 50, height: 50),
+              title: Text(ad.name),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.edit),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AdvertisementFormScreen(advertisement: ad),
+                        ),
+                      );
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.delete),
+                    onPressed: () => _showDeleteAdvertisementDialog(context, ad),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildJobsList() {
+    return StreamBuilder<List<JobModel>>(
+      stream: _jobService.getJobs(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        final jobs = snapshot.data ?? [];
+
+        return ListView.builder(
+          itemCount: jobs.length,
+          itemBuilder: (context, index) {
+            final job = jobs[index];
+            return FutureBuilder<WorkerModel?>(
+              future: _workerService.getWorkerById(job.workerId),
+              builder: (context, workerSnapshot) {
+                final workerName = workerSnapshot.data?.name ?? 'Trabajador no encontrado';
+                
+                return Card(
+                  margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  child: ListTile(
+                    title: Text(workerName),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Estado: ${job.done ? 'Realizado' : 'No realizado'}'),
+                        if (job.description.isNotEmpty)
+                          Text('Descripción: ${job.description}'),
+                        Text('Fecha: ${_formatDate(job.createdAt)}'),
+                      ],
+                    ),
+                    trailing: Container(
+                      padding: EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: job.done ? Colors.green[100] : Colors.red[100],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        job.done ? Icons.check_circle : Icons.cancel,
+                        color: job.done ? Colors.green : Colors.red,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
+  }
+
   void _showDeleteWorkerDialog(BuildContext context, WorkerModel worker) {
     showDialog(
       context: context,
@@ -181,10 +424,17 @@ class _HomeAdminScreenState extends State<HomeAdminScreen> with SingleTickerProv
           actions: [
             TextButton(
               child: Text('Cancelar'),
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFF343030),
+              ),
               onPressed: () => Navigator.pop(context),
             ),
             TextButton(
               child: Text('Eliminar'),
+              style: TextButton.styleFrom(
+                backgroundColor: const Color(0xFFD4451A),
+                foregroundColor: Colors.white,
+              ),
               onPressed: () async {
                 await _workerService.deleteWorker(worker.id);
                 Navigator.pop(context);
@@ -206,10 +456,17 @@ class _HomeAdminScreenState extends State<HomeAdminScreen> with SingleTickerProv
           actions: [
             TextButton(
               child: Text('Cancelar'),
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFF343030),
+              ),
               onPressed: () => Navigator.pop(context),
             ),
             TextButton(
               child: Text('Eliminar'),
+              style: TextButton.styleFrom(
+                backgroundColor: const Color(0xFFD4451A),
+                foregroundColor: Colors.white,
+              ),
               onPressed: () async {
                 await _areaService.deleteArea(area.id);
                 Navigator.pop(context);
@@ -221,7 +478,39 @@ class _HomeAdminScreenState extends State<HomeAdminScreen> with SingleTickerProv
     );
   }
 
-    void _handleLogout(BuildContext context) async {
+  void _showDeleteAdvertisementDialog(BuildContext context, AdvertisementModel ad) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirmar eliminación'),
+          content: Text('¿Estás seguro de que deseas eliminar la publicidad ${ad.name}?'),
+          actions: [
+            TextButton(
+              child: Text('Cancelar'),
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFF343030),
+              ),
+              onPressed: () => Navigator.pop(context),
+            ),
+            TextButton(
+              child: Text('Eliminar'),
+              style: TextButton.styleFrom(
+                backgroundColor: const Color(0xFFD4451A),
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () async {
+                await _adService.deleteAdvertisement(ad.id);
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _handleLogout(BuildContext context) async {
     // Mostrar un diálogo de confirmación
     bool confirmLogout = await showDialog(
       context: context,
@@ -232,10 +521,17 @@ class _HomeAdminScreenState extends State<HomeAdminScreen> with SingleTickerProv
           actions: <Widget>[
             TextButton(
               child: Text('Cancelar'),
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFF343030),
+              ),
               onPressed: () => Navigator.of(context).pop(false),
             ),
             TextButton(
               child: Text('Cerrar sesión'),
+              style: TextButton.styleFrom(
+                backgroundColor: const Color(0xFFD4451A),
+                foregroundColor: Colors.white,
+              ),
               onPressed: () => Navigator.of(context).pop(true),
             ),
           ],

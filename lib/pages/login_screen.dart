@@ -294,6 +294,9 @@ class _LoginScreenState extends State<LoginScreen> {
               TextButton(
                 onPressed: () => Navigator.pop(context),
                 child: Text('Cancelar'),
+                style: TextButton.styleFrom(
+                  foregroundColor: const Color(0xFF343030),
+                ),
               ),
               ElevatedButton(
                 onPressed: () async {

@@ -53,7 +53,7 @@ class SignUpWorkerScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Image.asset('assets/icon/jobyparalogo.png'),
+            Image.asset('assets/icon/logo-transparent.png', width: 200, height: 200),
             const SizedBox(height: 20),
             const Text(
               'Únete a nuestra comunidad de trabajadores y comienza a ofrecer tus servicios a través de nuestra aplicación.',

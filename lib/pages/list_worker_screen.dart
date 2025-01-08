@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import '../services/worker_service.dart';
 import '../models/worker_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 class ListWorkerScreen extends StatefulWidget {
-  final String selectedType;
+  final String selectedAreaId;
 
-  ListWorkerScreen({required this.selectedType});
+  ListWorkerScreen({required this.selectedAreaId});
 
   @override
   _ListWorkerScreenState createState() => _ListWorkerScreenState();
@@ -35,9 +37,9 @@ class _ListWorkerScreenState extends State<ListWorkerScreen> {
           _buildFilterButtons(),
           Expanded(
             child: StreamBuilder<List<WorkerModel>>(
-              stream: widget.selectedType.isEmpty 
+              stream: widget.selectedAreaId.isEmpty 
                   ? _workerService.getWorkers()
-                  : _workerService.getWorkersByType(widget.selectedType),
+                  : _workerService.getWorkersByArea(widget.selectedAreaId),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
@@ -150,22 +152,40 @@ class WorkerCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundImage: worker.imageUrl.isNotEmpty ? NetworkImage(worker.imageUrl) : AssetImage('assets/persona2.jpg'),
+          backgroundImage: AssetImage(
+            worker.category == 'Local' 
+                ? 'assets/local.jpg'  // Nueva imagen para locales
+                : 'assets/persona.jpg'       // Imagen existente para particulares
+          ),
+          child: worker.imageUrl.isNotEmpty
+              ? ClipOval(
+                  child: Image.network(
+                    worker.imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container();
+                    },
+                  ),
+                )
+              : null,
         ),
         title: Text(
           worker.name,
           style: TextStyle(color: const Color(0xFF343030)),
         ),
-        subtitle: Row(
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              '${worker.rating} ★',
-              style: TextStyle(color: const Color(0xFF343030)),
-            ),
-            SizedBox(width: 8),
-            Text(
-              worker.category,
-              style: TextStyle(color: const Color(0xFF343030)),
+            Text(worker.category),
+            FutureBuilder<List<String>>(
+              future: _getAreaNames(worker.areaIds),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) return Container();
+                return Text(
+                  'Áreas: ${snapshot.data!.join(", ")}',
+                  style: TextStyle(fontSize: 12),
+                );
+              },
             ),
           ],
         ),
@@ -178,5 +198,14 @@ class WorkerCard extends StatelessWidget {
         },
       ),
     );
+  }
+
+  Future<List<String>> _getAreaNames(List<String> areaIds) async {
+    final areas = await FirebaseFirestore.instance
+        .collection('areas')
+        .where(FieldPath.documentId, whereIn: areaIds)
+        .get();
+    
+    return areas.docs.map((doc) => doc.get('name') as String).toList();
   }
 }

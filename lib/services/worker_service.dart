@@ -19,18 +19,7 @@ class WorkerService {
   }
 
   // Obtener trabajadores por tipo
-  Stream<List<WorkerModel>> getWorkersByType(String type) {
-    return _firestore
-        .collection(collection)
-        .where('type', isEqualTo: type)
-        .where('isAvailable', isEqualTo: true)
-        .snapshots()
-        .map((snapshot) {
-      return snapshot.docs
-          .map((doc) => WorkerModel.fromFirestore(doc.data(), doc.id))
-          .toList();
-    });
-  }
+  // Stream<List<WorkerModel>> getWorkersByType(String type) { ... }
 
   // Agregar un nuevo trabajador
   Future<void> addWorker(WorkerModel worker) {
@@ -47,10 +36,11 @@ class WorkerService {
     return _firestore.collection(collection).doc(id).delete();
   }
 
+  // Actualizar este método para usar arrayContains en lugar de isEqualTo
   Stream<List<WorkerModel>> getWorkersByArea(String areaId) {
     return _firestore
         .collection(collection)
-        .where('areaId', isEqualTo: areaId)
+        .where('areaIds', arrayContains: areaId)
         .where('isAvailable', isEqualTo: true)
         .snapshots()
         .map((snapshot) {
@@ -58,5 +48,18 @@ class WorkerService {
           .map((doc) => WorkerModel.fromFirestore(doc.data(), doc.id))
           .toList();
     });
+  }
+
+  Future<WorkerModel?> getWorkerById(String workerId) async {
+    try {
+      final doc = await _firestore.collection(collection).doc(workerId).get();
+      if (doc.exists && doc.data() != null) {
+        return WorkerModel.fromFirestore(doc.data()!, doc.id);
+      }
+      return null;
+    } catch (e) {
+      print('Error al obtener el trabajador: $e');
+      return null;
+    }
   }
 } 
