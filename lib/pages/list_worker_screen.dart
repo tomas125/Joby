@@ -3,6 +3,8 @@ import '../services/worker_service.dart';
 import '../models/worker_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../widgets/help_button.dart';
+
 
 class ListWorkerScreen extends StatefulWidget {
   final String selectedAreaId;
@@ -30,6 +32,9 @@ class _ListWorkerScreenState extends State<ListWorkerScreen> {
           icon: Icon(Icons.arrow_back, color: const Color(0xFFE2E2E2)),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        actions: [
+          HelpButton(),
+        ],
       ),
       body: Column(
         children: [

@@ -6,6 +6,7 @@ import 'dart:developer' as developer;
 
 import 'package:Joby/preferences/pref_user.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../widgets/help_button.dart';
 
 class LoginScreen extends StatefulWidget {
   static const String routeName = '/login';
@@ -44,6 +45,9 @@ class _LoginScreenState extends State<LoginScreen> {
             Navigator.pop(context);
           },
         ),
+        actions: [
+          HelpButton(),
+        ],
       ),
       body: Form(
         key: _formKey,

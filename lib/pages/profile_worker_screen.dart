@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../models/worker_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/job_service.dart';
+import '../widgets/help_button.dart';
 
 class ProfileWorkerScreen extends StatelessWidget {
   final WorkerModel worker;
@@ -16,9 +17,14 @@ class ProfileWorkerScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFFD4451A),
-        title:
-            Text('Perfil del ${worker.category.toLowerCase()}', style: const TextStyle(color: Color(0xFFE2E2E2))),
+        title: Text(
+          'Perfil del ${worker.category.toLowerCase()}', 
+          style: const TextStyle(color: Color(0xFFE2E2E2))
+        ),
         iconTheme: const IconThemeData(color: Color(0xFFE2E2E2)),
+        actions: [
+          HelpButton(),
+        ],
       ),
       backgroundColor: const Color(0xFFD4451A),
       body: Padding(

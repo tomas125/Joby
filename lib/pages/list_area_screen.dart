@@ -8,6 +8,7 @@ import '../services/advertisement_service.dart';
 import '../models/advertisement_model.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
+import '../widgets/help_button.dart';
 
 class ListAreaScreen extends StatefulWidget {
   static const String routeName = '/list_area';
@@ -108,9 +109,10 @@ class _ListAreaScreenState extends State<ListAreaScreen> {
         appBar: AppBar(
           backgroundColor: const Color(0xFFD4451A),
           title: Text('¿Qué servicio estás buscando?',
-              style: TextStyle(color: const Color(0xFFE2E2E2))),
+              style: TextStyle(color: const Color(0xFFE2E2E2), fontSize: 20)),
           automaticallyImplyLeading: false,
           actions: [
+            HelpButton(),
             IconButton(
               icon: Icon(Icons.logout, color: const Color(0xFFE2E2E2)),
               onPressed: () => _handleLogout(context),

@@ -1,6 +1,7 @@
 import 'package:Joby/utils/snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../widgets/help_button.dart';
 
 class SignUpWorkerScreen extends StatelessWidget {
   const SignUpWorkerScreen({Key? key}) : super(key: key);
@@ -47,6 +48,9 @@ class SignUpWorkerScreen extends StatelessWidget {
             Navigator.pop(context);
           },
         ),
+        actions: [
+          HelpButton(),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

@@ -4,6 +4,7 @@ import 'package:Joby/utils/auth.dart';
 import 'dart:developer' as developer;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:Joby/preferences/pref_user.dart';
+import '../widgets/help_button.dart';
 
 class SignUpUserScreen extends StatefulWidget {
   static const String routeName = '/signup/user';
@@ -33,6 +34,9 @@ class _SignUpUserScreenState extends State<SignUpUserScreen> {
           icon: Icon(Icons.arrow_back, color: const Color(0xFFE2E2E2)),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          HelpButton(),
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
