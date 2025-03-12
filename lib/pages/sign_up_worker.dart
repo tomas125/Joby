@@ -2,6 +2,7 @@ import 'package:Joby/utils/snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../widgets/help_button.dart';
+import '../utils/app_styles.dart';
 
 class SignUpWorkerScreen extends StatelessWidget {
   const SignUpWorkerScreen({Key? key}) : super(key: key);
@@ -34,16 +35,16 @@ class SignUpWorkerScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFD4451A),
+      backgroundColor: AppStyles.primaryColor,
       appBar: AppBar(
         title: const Text(
           'Únete como trabajador',
-          style: TextStyle(color: const Color(0xFFE2E2E2)),
+          style: TextStyle(color: AppStyles.textLightColor),
         ),
-        backgroundColor: const Color(0xFFD4451A),
+        backgroundColor: AppStyles.primaryColor,
         leading: IconButton(
           icon: Icon(Icons.arrow_back,
-              color: const Color(0xFFE2E2E2)),
+              color: AppStyles.textLightColor),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -61,13 +62,13 @@ class SignUpWorkerScreen extends StatelessWidget {
             const SizedBox(height: 20),
             const Text(
               'Únete a nuestra comunidad de trabajadores y comienza a ofrecer tus servicios a través de nuestra aplicación.',
-              style: TextStyle(fontSize: 16, color: const Color(0xFFE2E2E2)),
+              style: TextStyle(fontSize: 16, color: AppStyles.textLightColor),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
             const Text(
               'Para solicitar tu alta como trabajador, simplemente presiona el botón de abajo y te pondremos en contacto con nuestro equipo a través de WhatsApp.',
-              style: TextStyle(fontSize: 16, color: const Color(0xFFE2E2E2)),
+              style: TextStyle(fontSize: 16, color: AppStyles.textLightColor),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 40),
@@ -78,19 +79,39 @@ class SignUpWorkerScreen extends StatelessWidget {
     );
   }
 
-  ElevatedButton _buildRequestButton(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () => _launchWhatsApp(context),
-      style: ElevatedButton.styleFrom(
-        foregroundColor: const Color(0xFF343030),
-        backgroundColor: const Color(0xFFD2CACA),
-        fixedSize: const Size(200, 80),
-        textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(25),
+  Widget _buildRequestButton(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(25),
+        splashColor: AppStyles.primaryColor.withOpacity(0.2),
+        highlightColor: Colors.white.withOpacity(0.1),
+        onTap: () => _launchWhatsApp(context),
+        child: Ink(
+          decoration: AppStyles.containerDecoration(borderRadius: 25.0),
+          child: Container(
+            width: 200,
+            height: 80,
+            alignment: Alignment.center,
+            child: Text(
+              'Solicitar',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppStyles.textDarkColor,
+                letterSpacing: 0.3,
+                shadows: [
+                  Shadow(
+                    blurRadius: 1.0,
+                    color: Colors.black.withOpacity(0.1),
+                    offset: Offset(0, 1),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
-      child: Text('Solicitar'),
     );
   }
 }

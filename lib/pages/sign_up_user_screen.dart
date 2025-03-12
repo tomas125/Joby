@@ -5,6 +5,7 @@ import 'dart:developer' as developer;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:Joby/preferences/pref_user.dart';
 import '../widgets/help_button.dart';
+import '../utils/app_styles.dart';
 
 class SignUpUserScreen extends StatefulWidget {
   static const String routeName = '/signup/user';
@@ -23,15 +24,15 @@ class _SignUpUserScreenState extends State<SignUpUserScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFD4451A),
+      backgroundColor: AppStyles.primaryColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFD4451A),
+        backgroundColor: AppStyles.primaryColor,
         title: Text(
           'Crear una cuenta',
-          style: TextStyle(color: const Color(0xFFE2E2E2)),
+          style: TextStyle(color: AppStyles.textLightColor),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: const Color(0xFFE2E2E2)),
+          icon: Icon(Icons.arrow_back, color: AppStyles.textLightColor),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
@@ -62,88 +63,106 @@ class _SignUpUserScreenState extends State<SignUpUserScreen> {
     );
   }
 
-  TextFormField _buildEmailField() {
-    return TextFormField(
-      controller: _emailController,
-      decoration: _inputDecoration('Ingrese su email'),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Por favor, ingrese su email';
-        }
-        return null;
-      },
+  Widget _buildEmailField() {
+    return Container(
+      decoration: AppStyles.commonDecoration(borderRadius: 10.0),
+      child: TextFormField(
+        controller: _emailController,
+        decoration: AppStyles.textFieldDecoration('Ingrese su email'),
+        style: TextStyle(color: AppStyles.textDarkColor),
+      ),
     );
   }
 
-  TextFormField _buildPasswordField() {
-    return TextFormField(
-      controller: _passwordController,
-      obscureText: _obscureText,
-      decoration: _inputDecoration('Ingrese su contraseña').copyWith(
-        suffixIcon: IconButton(
-          icon: Icon(
-            _obscureText ? Icons.visibility : Icons.visibility_off,
-            color: const Color(0xFF343030),
+  Widget _buildPasswordField() {
+    return Container(
+      decoration: AppStyles.commonDecoration(borderRadius: 10.0),
+      child: TextFormField(
+        controller: _passwordController,
+        obscureText: _obscureText,
+        decoration: AppStyles.textFieldDecoration('Ingrese su contraseña').copyWith(
+          suffixIcon: IconButton(
+            icon: Icon(
+              _obscureText ? Icons.visibility : Icons.visibility_off,
+              color: AppStyles.textDarkColor,
+            ),
+            onPressed: () => setState(() => _obscureText = !_obscureText),
           ),
-          onPressed: () => setState(() => _obscureText = !_obscureText),
         ),
-      ),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Por favor, ingrese su contraseña';
-        }
-        return null;
-      },
-    );
-  }
-
-  InputDecoration _inputDecoration(String hintText) {
-    return InputDecoration(
-      hintText: hintText,
-      hintStyle: TextStyle(color: const Color(0xFF343030)),
-      filled: true,
-      fillColor: const Color(0xFFD2CACA),
-      border: InputBorder.none,
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10.0),
-        borderSide: BorderSide(color: Colors.transparent),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10.0),
-        borderSide: BorderSide(color: Colors.transparent),
+        style: TextStyle(color: AppStyles.textDarkColor),
       ),
     );
   }
 
-  ElevatedButton _buildSignUpButton() {
-    return ElevatedButton(
-      onPressed: _handleRegister,
-      style: ElevatedButton.styleFrom(
-        foregroundColor: const Color(0xFF343030),
-        backgroundColor: const Color(0xFFD2CACA),
-        fixedSize: const Size(200, 45),
-        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(25),
+  Widget _buildSignUpButton() {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(25),
+        splashColor: AppStyles.primaryColor.withOpacity(0.2),
+        highlightColor: Colors.white.withOpacity(0.1),
+        onTap: _handleRegister,
+        child: Ink(
+          decoration: AppStyles.containerDecoration(borderRadius: 25.0),
+          child: Container(
+            width: 200,
+            height: 45,
+            alignment: Alignment.center,
+            child: Text(
+              'Registrarse',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppStyles.textDarkColor,
+                letterSpacing: 0.3,
+                shadows: [
+                  Shadow(
+                    blurRadius: 1.0,
+                    color: Colors.black.withOpacity(0.1),
+                    offset: Offset(0, 1),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
-      child: Text('Registrarse'),
     );
   }
 
-  ElevatedButton _buildGoogleButton() {
-    return ElevatedButton(
-      onPressed: _handleGoogleRegister,
-      style: ElevatedButton.styleFrom(
-        foregroundColor: const Color(0xFF343030),
-        backgroundColor: const Color(0xFFD2CACA),
-        fixedSize: const Size(200, 45),
-        textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(25),
+  Widget _buildGoogleButton() {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(25),
+        splashColor: AppStyles.primaryColor.withOpacity(0.2),
+        highlightColor: Colors.white.withOpacity(0.1),
+        onTap: _handleGoogleRegister,
+        child: Ink(
+          decoration: AppStyles.containerDecoration(borderRadius: 25.0),
+          child: Container(
+            width: 200,
+            height: 45,
+            alignment: Alignment.center,
+            child: Text(
+              'Continuar con Google',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: AppStyles.textDarkColor,
+                letterSpacing: 0.3,
+                shadows: [
+                  Shadow(
+                    blurRadius: 1.0,
+                    color: Colors.black.withOpacity(0.1),
+                    offset: Offset(0, 1),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
-      child: Text('Continuar con Google'),
     );
   }
 
@@ -157,12 +176,12 @@ class _SignUpUserScreenState extends State<SignUpUserScreen> {
           Text(
             'Inicia sesión',
             style: TextStyle(
-                color: const Color(0xFFD2CACA), fontWeight: FontWeight.bold),
+                color: AppStyles.secondaryColor, fontWeight: FontWeight.bold),
           ),
         ],
       ),
       style: TextButton.styleFrom(
-        foregroundColor: const Color(0xFFD2CACA),
+        foregroundColor: AppStyles.secondaryColor,
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../utils/app_styles.dart';
 
 class HomeScreen extends StatelessWidget {
   Future<bool> _onWillPop(BuildContext context) async {
@@ -12,14 +13,14 @@ class HomeScreen extends StatelessWidget {
           TextButton(
             child: Text('No'),
             style: TextButton.styleFrom(
-              foregroundColor: const Color(0xFF343030),
+              foregroundColor: AppStyles.textDarkColor,
             ),
             onPressed: () => Navigator.of(context).pop(false),
           ),
           TextButton(
             child: Text('Sí'),
             style: TextButton.styleFrom(
-              backgroundColor: const Color(0xFFD4451A),
+              backgroundColor: AppStyles.primaryColor,
               foregroundColor: Colors.white,
             ),
             onPressed: () => Navigator.of(context).pop(true),
@@ -43,7 +44,7 @@ class HomeScreen extends StatelessWidget {
         }
       },
       child: Scaffold(
-        backgroundColor: const Color(0xFFD4451A),
+        backgroundColor: AppStyles.primaryColor,
         body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -59,7 +60,7 @@ class HomeScreen extends StatelessWidget {
                 style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: const Color(0xFFE2E2E2)),
+                    color: AppStyles.textLightColor),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
@@ -75,23 +76,40 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  ElevatedButton _buildUserButton(
+  Widget _buildUserButton(
       BuildContext context, String label, String route, bool disabled) {
-    return ElevatedButton(
-      onPressed: () => disabled
-          ? null
-          : Navigator.pushNamed(
-              context, route),
-      style: ElevatedButton.styleFrom(
-        foregroundColor: const Color(0xFF343030),
-        backgroundColor: const Color(0xFFD2CACA),
-        fixedSize: const Size(200, 80),
-        textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(25),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(25),
+        splashColor: AppStyles.primaryColor.withOpacity(0.2),
+        highlightColor: Colors.white.withOpacity(0.1),
+        onTap: disabled ? null : () => Navigator.pushNamed(context, route),
+        child: Ink(
+          decoration: AppStyles.containerDecoration(borderRadius: 25.0),
+          child: Container(
+            width: 200,
+            height: 80,
+            alignment: Alignment.center,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppStyles.textDarkColor,
+                letterSpacing: 0.3,
+                shadows: [
+                  Shadow(
+                    blurRadius: 1.0,
+                    color: Colors.black.withOpacity(0.1),
+                    offset: Offset(0, 1),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
-      child: Text(label),
     );
   }
 }

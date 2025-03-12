@@ -16,6 +16,8 @@ class _AdvertisementFormScreenState extends State<AdvertisementFormScreen> {
   final _advertisementService = AdvertisementService();
   final _nameController = TextEditingController();
   final _imageUrlController = TextEditingController();
+  final _linkController = TextEditingController();
+  final _phoneNumberController = TextEditingController();
   bool _isAvailable = true;
   bool _isLoading = false;
 
@@ -25,6 +27,8 @@ class _AdvertisementFormScreenState extends State<AdvertisementFormScreen> {
     if (widget.advertisement != null) {
       _nameController.text = widget.advertisement!.name;
       _imageUrlController.text = widget.advertisement!.imageUrl;
+      _linkController.text = widget.advertisement!.link ?? '';
+      _phoneNumberController.text = widget.advertisement!.phoneNumber ?? '';
       _isAvailable = widget.advertisement!.isAvailable;
     }
   }
@@ -39,6 +43,8 @@ class _AdvertisementFormScreenState extends State<AdvertisementFormScreen> {
           name: _nameController.text,
           imageUrl: _imageUrlController.text,
           isAvailable: _isAvailable,
+          link: _linkController.text.isEmpty ? null : _linkController.text,
+          phoneNumber: _phoneNumberController.text.isEmpty ? null : _phoneNumberController.text,
         );
 
         if (widget.advertisement == null) {
@@ -65,9 +71,9 @@ class _AdvertisementFormScreenState extends State<AdvertisementFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.advertisement == null
-            ? 'Nueva Publicidad'
-            : 'Editar Publicidad'),
+        title: Text(
+          widget.advertisement == null ? 'Nueva Publicidad' : 'Editar Publicidad',
+        ),
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
@@ -76,22 +82,9 @@ class _AdvertisementFormScreenState extends State<AdvertisementFormScreen> {
               child: ListView(
                 padding: EdgeInsets.all(16.0),
                 children: [
-                  TextFormField(
-                    controller: _nameController,
-                    decoration: InputDecoration(labelText: 'Nombre'),
-                    validator: (value) =>
-                        value?.isEmpty ?? true ? 'Campo requerido' : null,
-                  ),
+                  _buildTextField(_nameController, 'Nombre', true),
                   SizedBox(height: 16),
-                  TextFormField(
-                    controller: _imageUrlController,
-                    decoration: InputDecoration(
-                      labelText: 'URL de la imagen',
-                      hintText: 'https://ejemplo.com/imagen.jpg',
-                    ),
-                    validator: (value) =>
-                        value?.isEmpty ?? true ? 'Ingrese una URL válida' : null,
-                  ),
+                  _buildTextField(_imageUrlController, 'URL de la imagen', true, 'https://ejemplo.com/imagen.jpg'),
                   if (_imageUrlController.text.isNotEmpty) ...[
                     SizedBox(height: 16),
                     Container(
@@ -105,26 +98,50 @@ class _AdvertisementFormScreenState extends State<AdvertisementFormScreen> {
                       ),
                     ),
                   ],
-                  SwitchListTile(
-                    title: Text('Disponible'),
-                    activeColor: Color(0xFFD4451A),
-                    value: _isAvailable,
-                    onChanged: (bool value) {
-                      setState(() => _isAvailable = value);
-                    },
-                  ),
                   SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: _saveAdvertisement,
-                    child: Text('Guardar'),
-                    style: TextButton.styleFrom(
-                      backgroundColor: const Color(0xFFD4451A),
-                      foregroundColor: Colors.white,
-                    ),
-                  ),
+                  _buildTextField(_linkController, 'Link (opcional)', false, 'https://ejemplo.com'),
+                  SizedBox(height: 16),
+                  _buildTextField(_phoneNumberController, 'Número de teléfono (opcional)', false, '+54 9 11 1234-5678'),
+                  SizedBox(height: 16),
+                  _buildAvailabilitySwitch(),
+                  SizedBox(height: 24),
+                  _buildSubmitButton(),
                 ],
               ),
             ),
+    );
+  }
+
+  Widget _buildTextField(TextEditingController controller, String label, bool required, [String? hint]) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        border: OutlineInputBorder(),
+      ),
+      validator: required ? (value) => value?.isEmpty ?? true ? 'Campo requerido' : null : null,
+      keyboardType: label.contains('teléfono') ? TextInputType.phone : TextInputType.text,
+    );
+  }
+
+  Widget _buildAvailabilitySwitch() {
+    return Card(
+      child: SwitchListTile(
+        title: Text('Disponible'),
+        value: _isAvailable,
+        onChanged: (value) => setState(() => _isAvailable = value),
+      ),
+    );
+  }
+
+  Widget _buildSubmitButton() {
+    return ElevatedButton(
+      onPressed: _saveAdvertisement,
+      child: Text('Guardar'),
+      style: ElevatedButton.styleFrom(
+        minimumSize: Size(double.infinity, 50),
+      ),
     );
   }
 
@@ -132,6 +149,8 @@ class _AdvertisementFormScreenState extends State<AdvertisementFormScreen> {
   void dispose() {
     _nameController.dispose();
     _imageUrlController.dispose();
+    _linkController.dispose();
+    _phoneNumberController.dispose();
     super.dispose();
   }
-} 
+}

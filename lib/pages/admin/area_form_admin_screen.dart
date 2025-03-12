@@ -31,39 +31,56 @@ class _AreaFormAdminScreenState extends State<AreaFormAdminScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.area == null ? 'Nuevo Servicio' : 'Editar Servicio'),
+        title: Text(
+          widget.area == null ? 'Nuevo Servicio' : 'Editar Servicio',
+        ),
       ),
       body: Form(
         key: _formKey,
         child: ListView(
           padding: EdgeInsets.all(16.0),
           children: [
-            TextFormField(
-              controller: _nameController,
-              decoration: InputDecoration(labelText: 'Nombre del servicio'),
-              validator: (value) =>
-                  value?.isEmpty ?? true ? 'Este campo es requerido' : null,
-            ),
-            TextFormField(
-              controller: _iconController,
-              decoration: InputDecoration(labelText: 'Ícono'),
-            ),
-            TextFormField(
-              controller: _descriptionController,
-              decoration: InputDecoration(labelText: 'Descripción'),
-              maxLines: 3,
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _saveArea,
-              child: Text('Guardar'),
-              style: TextButton.styleFrom(
-                backgroundColor: const Color(0xFFD4451A),
-                foregroundColor: Colors.white,
-              ),
-            ),
+            _buildTextField(_nameController, 'Nombre del servicio', true),
+            SizedBox(height: 16),
+            _buildTextField(_iconController, 'Ícono', false),
+            SizedBox(height: 16),
+            _buildDescriptionField(),
+            SizedBox(height: 24),
+            _buildSubmitButton(),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildTextField(TextEditingController controller, String label, bool required) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(),
+      ),
+      validator: required ? (value) => value?.isEmpty ?? true ? 'Este campo es requerido' : null : null,
+    );
+  }
+
+  Widget _buildDescriptionField() {
+    return TextFormField(
+      controller: _descriptionController,
+      decoration: InputDecoration(
+        labelText: 'Descripción',
+        border: OutlineInputBorder(),
+      ),
+      maxLines: 3,
+    );
+  }
+
+  Widget _buildSubmitButton() {
+    return ElevatedButton(
+      onPressed: _saveArea,
+      child: Text('Guardar'),
+      style: ElevatedButton.styleFrom(
+        minimumSize: Size(double.infinity, 50),
       ),
     );
   }

@@ -15,6 +15,7 @@ import 'pages/admin/area_form_admin_screen.dart';
 import 'pages/admin/advertisement_form_screen.dart';
 import 'utils/auth.dart';
 import 'models/worker_model.dart';
+import 'utils/update_checker.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,19 +47,22 @@ class MyApp extends StatelessWidget {
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: FutureBuilder<dynamic>(
-        future: AuthService().checkCurrentUser(),
-        builder: (context, userSnapshot) {
-          if (userSnapshot.hasError) {
-            return Center(child: Text('Error: ${userSnapshot.error}'));
+        future: Future.wait([
+          AuthService().checkCurrentUser(),
+          UpdateChecker.checkForUpdate(context),
+        ]),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
           }
           
-          if (userSnapshot.connectionState == ConnectionState.waiting) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return const Scaffold(
               body: Center(child: CircularProgressIndicator()),
             );
           }
           
-          final user = userSnapshot.data;
+          final user = snapshot.data?[0];
           if (user) {
             return FutureBuilder<bool>(
               future: AuthService().isAdmin(),

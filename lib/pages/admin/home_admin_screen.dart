@@ -48,17 +48,10 @@ class _HomeAdminScreenState extends State<HomeAdminScreen> with SingleTickerProv
         actions: [
           TextButton(
             child: Text('No'),
-            style: TextButton.styleFrom(
-              foregroundColor: const Color(0xFF343030),
-            ),
             onPressed: () => Navigator.of(context).pop(false),
           ),
           TextButton(
             child: Text('Sí'),
-            style: TextButton.styleFrom(
-              backgroundColor: const Color(0xFFD4451A),
-              foregroundColor: Colors.white,
-            ),
             onPressed: () => Navigator.of(context).pop(true),
           ),
         ],
@@ -88,8 +81,6 @@ class _HomeAdminScreenState extends State<HomeAdminScreen> with SingleTickerProv
           title: Text('Panel de Administración'),
           bottom: TabBar(
             controller: _tabController,
-            labelStyle: TextStyle(color: Color(0xFF343030)),
-            indicatorColor: Color(0xFFD4451A),
             tabs: [
               Tab(text: 'Trabajadores'),
               Tab(text: 'Servicios'),
@@ -119,8 +110,6 @@ class _HomeAdminScreenState extends State<HomeAdminScreen> with SingleTickerProv
             );
           },
           child: Icon(Icons.add),
-          backgroundColor: Color(0xFFD4451A),
-          foregroundColor: Colors.white,
         ) : null,
         body: TabBarView(
           controller: _tabController,
@@ -224,9 +213,8 @@ class _HomeAdminScreenState extends State<HomeAdminScreen> with SingleTickerProv
           return Container(
             padding: EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
               border: Border.all(color: Colors.grey),
+              borderRadius: BorderRadius.circular(8.0),
             ),
             child: DropdownButton<String>(
               isExpanded: true,
@@ -424,15 +412,12 @@ class _HomeAdminScreenState extends State<HomeAdminScreen> with SingleTickerProv
           actions: [
             TextButton(
               child: Text('Cancelar'),
-              style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFF343030),
-              ),
               onPressed: () => Navigator.pop(context),
             ),
             TextButton(
               child: Text('Eliminar'),
               style: TextButton.styleFrom(
-                backgroundColor: const Color(0xFFD4451A),
+                backgroundColor: Colors.red,
                 foregroundColor: Colors.white,
               ),
               onPressed: () async {
@@ -456,15 +441,12 @@ class _HomeAdminScreenState extends State<HomeAdminScreen> with SingleTickerProv
           actions: [
             TextButton(
               child: Text('Cancelar'),
-              style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFF343030),
-              ),
               onPressed: () => Navigator.pop(context),
             ),
             TextButton(
               child: Text('Eliminar'),
               style: TextButton.styleFrom(
-                backgroundColor: const Color(0xFFD4451A),
+                backgroundColor: Colors.red,
                 foregroundColor: Colors.white,
               ),
               onPressed: () async {
@@ -488,15 +470,12 @@ class _HomeAdminScreenState extends State<HomeAdminScreen> with SingleTickerProv
           actions: [
             TextButton(
               child: Text('Cancelar'),
-              style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFF343030),
-              ),
               onPressed: () => Navigator.pop(context),
             ),
             TextButton(
               child: Text('Eliminar'),
               style: TextButton.styleFrom(
-                backgroundColor: const Color(0xFFD4451A),
+                backgroundColor: Colors.red,
                 foregroundColor: Colors.white,
               ),
               onPressed: () async {
@@ -521,15 +500,12 @@ class _HomeAdminScreenState extends State<HomeAdminScreen> with SingleTickerProv
           actions: <Widget>[
             TextButton(
               child: Text('Cancelar'),
-              style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFF343030),
-              ),
               onPressed: () => Navigator.of(context).pop(false),
             ),
             TextButton(
               child: Text('Cerrar sesión'),
               style: TextButton.styleFrom(
-                backgroundColor: const Color(0xFFD4451A),
+                backgroundColor: Colors.red,
                 foregroundColor: Colors.white,
               ),
               onPressed: () => Navigator.of(context).pop(true),

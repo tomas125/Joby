@@ -4,6 +4,8 @@ class AdvertisementModel {
   final String imageUrl;
   final bool isAvailable;
   final bool isExternalUrl;
+  final String? link;
+  final String? phoneNumber;
 
   AdvertisementModel({
     required this.id,
@@ -11,6 +13,8 @@ class AdvertisementModel {
     required this.imageUrl,
     this.isAvailable = true,
     this.isExternalUrl = false,
+    this.link,
+    this.phoneNumber,
   });
 
   factory AdvertisementModel.fromFirestore(Map<String, dynamic> data, String id) {
@@ -20,6 +24,8 @@ class AdvertisementModel {
       imageUrl: data['imageUrl'] ?? '',
       isAvailable: data['isAvailable'] ?? true,
       isExternalUrl: data['isExternalUrl'] ?? false,
+      link: data['link'],
+      phoneNumber: data['phoneNumber'],
     );
   }
 
@@ -29,6 +35,8 @@ class AdvertisementModel {
       'imageUrl': imageUrl,
       'isAvailable': isAvailable,
       'isExternalUrl': isExternalUrl,
+      'link': link,
+      'phoneNumber': phoneNumber,
     };
   }
 } 

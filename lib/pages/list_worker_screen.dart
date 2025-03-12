@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import '../services/worker_service.dart';
 import '../models/worker_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import '../widgets/help_button.dart';
-
+import '../utils/app_styles.dart';
 
 class ListWorkerScreen extends StatefulWidget {
   final String selectedAreaId;
@@ -23,13 +22,13 @@ class _ListWorkerScreenState extends State<ListWorkerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFD4451A),
+      backgroundColor: AppStyles.primaryColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFD4451A),
+        backgroundColor: AppStyles.primaryColor,
         title: Text('Trabajadores disponibles',
-            style: TextStyle(color: const Color(0xFFE2E2E2))),
+            style: TextStyle(color: AppStyles.textLightColor)),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: const Color(0xFFE2E2E2)),
+          icon: Icon(Icons.arrow_back, color: AppStyles.textLightColor),
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
@@ -78,19 +77,15 @@ class _ListWorkerScreenState extends State<ListWorkerScreen> {
   Widget _buildSearchField() {
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: TextField(
-        decoration: InputDecoration(
-          hintText: 'Buscar Trabajador...',
-          hintStyle: TextStyle(color: const Color(0xFF343030)),
-          prefixIcon: Icon(Icons.search, color: const Color(0xFF343030)),
-          filled: true,
-          fillColor: const Color(0xFFD2CACA),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10.0),
-            borderSide: BorderSide.none,
+      child: Container(
+        decoration: AppStyles.commonDecoration(borderRadius: 10.0),
+        child: TextField(
+          decoration: AppStyles.textFieldDecoration('Buscar Trabajador...').copyWith(
+            prefixIcon: Icon(Icons.search, color: AppStyles.textDarkColor),
           ),
+          onChanged: (value) => setState(() => searchQuery = value.toLowerCase()),
+          style: TextStyle(color: AppStyles.textDarkColor),
         ),
-        onChanged: (value) => setState(() => searchQuery = value),
       ),
     );
   }
@@ -110,16 +105,51 @@ class _ListWorkerScreenState extends State<ListWorkerScreen> {
 
   Widget _buildFilterButton(String type) {
     bool isSelected = filterType == type;
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: isSelected
-            ? const Color(0xFFF88C6A)
-            : const Color(0xFFD2CACA),
-        foregroundColor: const Color(0xFF343030),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(10),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(10),
+        splashColor: AppStyles.primaryColor.withOpacity(0.2),
+        highlightColor: Colors.white.withOpacity(0.1),
+        onTap: () => setState(() => filterType = type),
+        child: Ink(
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.white : AppStyles.textDarkColor,
+            gradient: isSelected ? null : null,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 4.0,
+                offset: Offset(0, 2),
+              ),
+            ],
+            border: Border.all(
+              color: Colors.white.withOpacity(0.3),
+              width: 1.0,
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Text(
+              type,
+              style: TextStyle(
+                color: isSelected ? AppStyles.textDarkColor : AppStyles.textLightColor,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.3,
+                shadows: [
+                  Shadow(
+                    blurRadius: 1.0,
+                    color: Colors.black.withOpacity(0.1),
+                    offset: Offset(0, 1),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
-      onPressed: () => setState(() => filterType = type),
-      child: Text(type),
     );
   }
 
@@ -128,7 +158,7 @@ class _ListWorkerScreenState extends State<ListWorkerScreen> {
       padding: const EdgeInsets.all(16.0),
       child: Text(
         'Total de Trabajadores: ${workers.length}',
-        style: TextStyle(color: const Color(0xFFE2E2E2), fontSize: 16),
+        style: TextStyle(color: AppStyles.textLightColor, fontSize: 16),
       ),
     );
   }
@@ -151,56 +181,142 @@ class WorkerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return Container(
       margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: const Color(0xFFD2CACA),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundImage: AssetImage(
-            worker.category == 'Local' 
-                ? 'assets/local.jpg'  // Nueva imagen para locales
-                : 'assets/persona.jpg'       // Imagen existente para particulares
-          ),
-          child: worker.imageUrl.isNotEmpty
-              ? ClipOval(
-                  child: Image.network(
-                    worker.imageUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container();
-                    },
+      decoration: AppStyles.cardDecoration(),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(10),
+          splashColor: AppStyles.primaryColor.withOpacity(0.2),
+          highlightColor: Colors.white.withOpacity(0.1),
+          onTap: () {
+            Navigator.pushNamed(
+              context,
+              '/profile/worker',
+              arguments: worker,
+            );
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Row(
+              children: [
+                _buildWorkerAvatar(worker),
+                SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        worker.name,
+                        style: TextStyle(
+                          color: AppStyles.textDarkColor, 
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          letterSpacing: 0.3,
+                          shadows: [
+                            Shadow(
+                              blurRadius: 1.0,
+                              color: Colors.black.withOpacity(0.1),
+                              offset: Offset(0, 1),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: worker.category == 'Local' 
+                              ? AppStyles.primaryColor.withOpacity(0.2)
+                              : AppStyles.textDarkColor.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          worker.category, 
+                          style: TextStyle(
+                            color: worker.category == 'Local' 
+                                ? AppStyles.primaryColor
+                                : AppStyles.textDarkColor,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      FutureBuilder<List<String>>(
+                        future: _getAreaNames(worker.areaIds),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) return Container();
+                          return Text(
+                            'Áreas: ${snapshot.data!.join(", ")}',
+                            style: TextStyle(
+                              fontSize: 12, 
+                              color: AppStyles.textDarkColor,
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                   ),
-                )
-              : null,
-        ),
-        title: Text(
-          worker.name,
-          style: TextStyle(color: const Color(0xFF343030)),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(worker.category),
-            FutureBuilder<List<String>>(
-              future: _getAreaNames(worker.areaIds),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) return Container();
-                return Text(
-                  'Áreas: ${snapshot.data!.join(", ")}',
-                  style: TextStyle(fontSize: 12),
-                );
-              },
+                ),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  color: AppStyles.textDarkColor,
+                  size: 16,
+                ),
+              ],
             ),
-          ],
+          ),
         ),
-        onTap: () {
-          Navigator.pushNamed(
-            context,
-            '/profile/worker',
-            arguments: worker,
-          );
-        },
+      ),
+    );
+  }
+
+  Widget _buildWorkerAvatar(WorkerModel worker) {
+    return Container(
+      width: 70,
+      height: 70,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: AppStyles.secondaryColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 6,
+            offset: Offset(0, 3),
+          ),
+        ],
+        border: Border.all(
+          color: Colors.white.withOpacity(0.5),
+          width: 3.0,
+        ),
+      ),
+      child: ClipOval(
+        child: worker.imageUrl.isNotEmpty
+            ? Image.network(
+                worker.imageUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return _buildDefaultAvatar(worker);
+                },
+              )
+            : _buildDefaultAvatar(worker),
+      ),
+    );
+  }
+
+  Widget _buildDefaultAvatar(WorkerModel worker) {
+    return Container(
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage(
+            worker.category == 'Local' 
+                ? 'assets/local.jpg'
+                : 'assets/persona.jpg'
+          ),
+          fit: BoxFit.cover,
+        ),
       ),
     );
   }

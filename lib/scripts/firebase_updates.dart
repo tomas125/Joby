@@ -98,6 +98,7 @@ class FirebaseUpdates {
     await updateWorkersCollection();
     await migrateServicesToAreas();
     await linkWorkersWithAreas();
+    await updateAdvertisementsWithNewFields();
     print('Todas las actualizaciones completadas');
   }
 
@@ -210,6 +211,90 @@ class FirebaseUpdates {
 
     } catch (e) {
       print('Error en la limpieza: $e');
+    }
+  }
+
+  // Actualizar anuncios con nuevos campos link y phoneNumber
+  Future<void> updateAdvertisementsWithNewFields() async {
+    try {
+      final QuerySnapshot adsSnapshot = 
+          await _firestore.collection('advertisements').get();
+      
+      final WriteBatch batch = _firestore.batch();
+      
+      for (var doc in adsSnapshot.docs) {
+        // Verificar si los campos ya existen
+        final bool hasLink = doc.data().toString().contains('link');
+        final bool hasPhoneNumber = doc.data().toString().contains('phoneNumber');
+        
+        // Solo actualizar si los campos no existen
+        if (!hasLink || !hasPhoneNumber) {
+          final Map<String, dynamic> updateData = {};
+          
+          if (!hasLink) {
+            // Especificar explícitamente como String nulo
+            updateData['link'] = null;
+          }
+          
+          if (!hasPhoneNumber) {
+            // Especificar explícitamente como String nulo
+            updateData['phoneNumber'] = null;
+          }
+          
+          batch.update(doc.reference, updateData);
+        }
+      }
+      
+      await batch.commit();
+      print('Anuncios actualizados con nuevos campos link y phoneNumber');
+
+      // Verificar y corregir el tipo de datos para todos los documentos
+      await _ensureFieldTypes();
+    } catch (e) {
+      print('Error actualizando anuncios: $e');
+    }
+  }
+
+  // Asegurar que los campos tengan el tipo de dato correcto
+  Future<void> _ensureFieldTypes() async {
+    try {
+      final QuerySnapshot adsSnapshot = 
+          await _firestore.collection('advertisements').get();
+      
+      final WriteBatch batch = _firestore.batch();
+      int updatedCount = 0;
+      
+      for (var doc in adsSnapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        bool needsUpdate = false;
+        final Map<String, dynamic> updateData = {};
+        
+        // Verificar y corregir el tipo de link
+        if (data.containsKey('link') && data['link'] != null && !(data['link'] is String)) {
+          updateData['link'] = data['link'].toString();
+          needsUpdate = true;
+        }
+        
+        // Verificar y corregir el tipo de phoneNumber
+        if (data.containsKey('phoneNumber') && data['phoneNumber'] != null && !(data['phoneNumber'] is String)) {
+          updateData['phoneNumber'] = data['phoneNumber'].toString();
+          needsUpdate = true;
+        }
+        
+        if (needsUpdate) {
+          batch.update(doc.reference, updateData);
+          updatedCount++;
+        }
+      }
+      
+      if (updatedCount > 0) {
+        await batch.commit();
+        print('Se corrigió el tipo de datos en $updatedCount anuncios');
+      } else {
+        print('Todos los anuncios tienen el tipo de datos correcto');
+      }
+    } catch (e) {
+      print('Error verificando tipos de datos: $e');
     }
   }
 } 

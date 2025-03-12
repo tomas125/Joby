@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:Joby/utils/snackbar.dart';
 import 'package:Joby/utils/auth.dart';
+import '../utils/app_styles.dart';
 
 import 'dart:developer' as developer;
 
@@ -30,17 +31,17 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFD4451A),
+      backgroundColor: AppStyles.primaryColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFD4451A),
+        backgroundColor: AppStyles.primaryColor,
         title: Text(
           'Iniciar Sesión',
           style: TextStyle(
-              color: const Color(0xFFE2E2E2)),
+              color: AppStyles.textLightColor),
         ),
         leading: IconButton(
           icon: Icon(Icons.arrow_back,
-              color: const Color(0xFFE2E2E2)),
+              color: AppStyles.textLightColor),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -63,8 +64,8 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(height: 16.0),
               _buildGoogleLoginButton(),
               SizedBox(height: 8.0),
-              _buildSignUpButton(),
               _buildForgotPasswordButton(),
+              _buildSignUpButton(),
             ],
           ),
         ),
@@ -72,66 +73,36 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  TextFormField _buildEmailField() {
-    return TextFormField(
-      controller: _emailController,
-      decoration: InputDecoration(
-        labelStyle: TextStyle(color: const Color(0xFF343030)),
-        filled: true,
-        fillColor: const Color(0xFFD2CACA),
-        border: InputBorder.none,
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10.0),
-          borderSide: BorderSide(color: Colors.transparent),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10.0),
-          borderSide: BorderSide(color: Colors.transparent),
-        ),
-        hintText: 'Ingrese su email',
+  Widget _buildEmailField() {
+    return Container(
+      decoration: AppStyles.commonDecoration(borderRadius: 10.0),
+      child: TextFormField(
+        controller: _emailController,
+        decoration: AppStyles.textFieldDecoration('Ingrese su email'),
+        style: TextStyle(color: AppStyles.textDarkColor),
       ),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Por favor, ingrese su email';
-        }
-        return null;
-      },
     );
   }
 
-  TextFormField _buildPasswordField() {
-    return TextFormField(
-      controller: _passwordController,
-      decoration: InputDecoration(
-        labelStyle: TextStyle(color: const Color(0xFF343030)),
-        filled: true,
-        fillColor: const Color(0xFFD2CACA),
-        border: InputBorder.none,
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10.0),
-          borderSide: BorderSide(color: Colors.transparent),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10.0),
-          borderSide: BorderSide(color: Colors.transparent),
-        ),
-        hintText: 'Ingrese su contraseña',
-        suffixIcon: IconButton(
-          icon: Icon(
-            _obscureText
-                ? Icons.visibility
-                : Icons.visibility_off,
+  Widget _buildPasswordField() {
+    return Container(
+      decoration: AppStyles.commonDecoration(borderRadius: 10.0),
+      child: TextFormField(
+        controller: _passwordController,
+        decoration: AppStyles.textFieldDecoration('Ingrese su contraseña').copyWith(
+          suffixIcon: IconButton(
+            icon: Icon(
+              _obscureText
+                  ? Icons.visibility
+                  : Icons.visibility_off,
+              color: AppStyles.textDarkColor,
+            ),
+            onPressed: _togglePasswordVisibility,
           ),
-          onPressed: _togglePasswordVisibility,
         ),
+        obscureText: _obscureText,
+        style: TextStyle(color: AppStyles.textDarkColor),
       ),
-      obscureText: _obscureText,
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Por favor, ingrese su contraseña';
-        }
-        return null;
-      },
     );
   }
 
@@ -141,19 +112,39 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
-  ElevatedButton _buildLoginButton() {
-    return ElevatedButton(
-      onPressed: _handleLogin,
-      style: ElevatedButton.styleFrom(
-        foregroundColor: const Color(0xFF343030),
-        backgroundColor: const Color(0xFFD2CACA),
-        fixedSize: const Size(200, 45),
-        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(25),
+  Widget _buildLoginButton() {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(25),
+        splashColor: AppStyles.primaryColor.withOpacity(0.2),
+        highlightColor: Colors.white.withOpacity(0.1),
+        onTap: _handleLogin,
+        child: Ink(
+          decoration: AppStyles.containerDecoration(borderRadius: 25.0),
+          child: Container(
+            width: 200,
+            height: 45,
+            alignment: Alignment.center,
+            child: Text(
+              'Iniciar Sesión',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppStyles.textDarkColor,
+                letterSpacing: 0.3,
+                shadows: [
+                  Shadow(
+                    blurRadius: 1.0,
+                    color: Colors.black.withOpacity(0.1),
+                    offset: Offset(0, 1),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
-      child: Text('Iniciar Sesión'),
     );
   }
 
@@ -208,19 +199,39 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  ElevatedButton _buildGoogleLoginButton() {
-    return ElevatedButton(
-      onPressed: _handleGoogleLogin,
-      style: ElevatedButton.styleFrom(
-        foregroundColor: const Color(0xFF343030),
-        backgroundColor: const Color(0xFFD2CACA),
-        fixedSize: const Size(200, 45),
-        textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(25),
+  Widget _buildGoogleLoginButton() {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(25),
+        splashColor: AppStyles.primaryColor.withOpacity(0.2),
+        highlightColor: Colors.white.withOpacity(0.1),
+        onTap: _handleGoogleLogin,
+        child: Ink(
+          decoration: AppStyles.containerDecoration(borderRadius: 25.0),
+          child: Container(
+            width: 200,
+            height: 45,
+            alignment: Alignment.center,
+            child: Text(
+              'Continuar con Google',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: AppStyles.textDarkColor,
+                letterSpacing: 0.3,
+                shadows: [
+                  Shadow(
+                    blurRadius: 1.0,
+                    color: Colors.black.withOpacity(0.1),
+                    offset: Offset(0, 1),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
-      child: Text('Continuar con Google'),
     );
   }
 
@@ -263,7 +274,7 @@ class _LoginScreenState extends State<LoginScreen> {
       },
       child: Text('¿No tienes cuenta?'),
       style: TextButton.styleFrom(
-        foregroundColor: const Color(0xFFD2CACA),
+        foregroundColor: AppStyles.textLightColor,
       ),
     );
   }
@@ -273,81 +284,167 @@ class _LoginScreenState extends State<LoginScreen> {
       onPressed: () {
         showDialog(
           context: context,
-          builder: (context) => AlertDialog(
-            title: Text('Recuperar Contraseña'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('Ingresa tu correo electrónico para recuperar tu contraseña'),
-                SizedBox(height: 16),
-                TextFormField(
-                  controller: _emailController,
-                  decoration: InputDecoration(
-                    hintText: 'Correo electrónico',
-                    filled: true,
-                    fillColor: const Color(0xFFD2CACA),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                      borderSide: BorderSide.none,
+          builder: (context) => Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20.0),
+            ),
+            child: Container(
+              padding: EdgeInsets.all(20),
+              decoration: AppStyles.commonDecoration(borderRadius: 20.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Recuperar Contraseña',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: AppStyles.textDarkColor,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'Ingresa tu correo electrónico para recuperar tu contraseña',
+                    style: TextStyle(
+                      color: AppStyles.textDarkColor,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 16),
+                  Container(
+                    decoration: AppStyles.commonDecoration(borderRadius: 10.0),
+                    child: TextFormField(
+                      controller: _emailController,
+                      decoration: AppStyles.textFieldDecoration('Correo electrónico'),
+                      style: TextStyle(color: AppStyles.textDarkColor),
                     ),
                   ),
-                ),
-              ],
+                  SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(25),
+                          splashColor: AppStyles.primaryColor.withOpacity(0.2),
+                          highlightColor: Colors.white.withOpacity(0.1),
+                          onTap: () => Navigator.pop(context),
+                          child: Ink(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  AppStyles.textDarkColor.withOpacity(0.9),
+                                  AppStyles.textDarkColor,
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(25),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 4.0,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Container(
+                              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                              child: Text(
+                                'Cancelar',
+                                style: TextStyle(
+                                  color: AppStyles.textLightColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 16),
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(25),
+                          splashColor: AppStyles.primaryColor.withOpacity(0.2),
+                          highlightColor: Colors.white.withOpacity(0.1),
+                          onTap: () async {
+                            if (_emailController.text.isEmpty) {
+                              SnackBarUtil.showError(
+                                context: context,
+                                message: 'Por favor, ingresa tu correo electrónico',
+                              );
+                              return;
+                            }
+
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (context) => Center(child: CircularProgressIndicator()),
+                            );
+
+                            final result = await _auth.resetPassword(_emailController.text);
+                            
+                            Navigator.pop(context);
+
+                            if (result.success) {
+                              Navigator.pop(context); // Cerrar el diálogo de recuperación
+                              SnackBarUtil.showSuccess(
+                                context: context,
+                                message: result.errorMessage ?? 'Correo enviado exitosamente',
+                              );
+                            } else {
+                              SnackBarUtil.showError(
+                                context: context,
+                                message: result.errorMessage ?? 'Error al enviar el correo',
+                              );
+                            }
+                          },
+                          child: Ink(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  AppStyles.primaryColor.withOpacity(0.9),
+                                  AppStyles.primaryColor,
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(25),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 4.0,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Container(
+                              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                              child: Text(
+                                'Enviar',
+                                style: TextStyle(
+                                  color: AppStyles.textLightColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text('Cancelar'),
-                style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFF343030),
-                ),
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  if (_emailController.text.isEmpty) {
-                    SnackBarUtil.showError(
-                      context: context,
-                      message: 'Por favor, ingresa tu correo electrónico',
-                    );
-                    return;
-                  }
-
-                  showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (context) => Center(child: CircularProgressIndicator()),
-                  );
-
-                  final result = await _auth.resetPassword(_emailController.text);
-                  
-                  Navigator.pop(context);
-                  Navigator.pop(context);
-
-                  if (result.success) {
-                    SnackBarUtil.showSuccess(
-                      context: context,
-                      message: result.errorMessage ?? 'Correo enviado exitosamente',
-                    );
-                  } else {
-                    SnackBarUtil.showError(
-                      context: context,
-                      message: result.errorMessage ?? 'Error al enviar el correo',
-                    );
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFD4451A),
-                  foregroundColor: Colors.white,
-                ),
-                child: Text('Enviar'),
-              ),
-            ],
           ),
         );
       },
       child: Text('¿Olvidó su contraseña?'),
       style: TextButton.styleFrom(
-        foregroundColor: const Color(0xFFD2CACA),
+        foregroundColor: AppStyles.textLightColor,
       ),
     );
   }

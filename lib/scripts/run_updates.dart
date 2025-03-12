@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:Joby/utils/firebase_config.dart';
 import 'firebase_updates.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   try {
@@ -22,12 +22,13 @@ void main() async {
 
     final updates = FirebaseUpdates();
     
-    // Ejecutar actualizaciones
-    print('Iniciando actualizaciones...');
-    await updates.runAllUpdates();
-    // await updates.updateImageFields();
+    // Ejecutar solo la actualización de anuncios
+    await updates.updateAdvertisementsWithNewFields();
     
-    print('Actualizaciones completadas exitosamente');
+    // O ejecutar todas las actualizaciones
+    // await updates.runAllUpdates();
+    
+    print('Script de actualización completado');
   } catch (e) {
     print('Error ejecutando actualizaciones: $e');
   }

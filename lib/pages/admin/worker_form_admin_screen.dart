@@ -50,70 +50,95 @@ class _WorkerFormAdminScreenState extends State<WorkerFormAdminScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.worker == null ? 'Nuevo Trabajador' : 'Editar Trabajador'),
+        title: Text(
+          widget.worker == null ? 'Nuevo Trabajador' : 'Editar Trabajador',
+        ),
       ),
       body: Form(
         key: _formKey,
         child: ListView(
           padding: EdgeInsets.all(16.0),
           children: [
-            TextFormField(
-              controller: _nameController,
-              decoration: InputDecoration(labelText: 'Nombre'),
-              validator: (value) => value?.isEmpty ?? true ? 'Campo requerido' : null,
-            ),
-            TextFormField(
-              controller: _emailController,
-              decoration: InputDecoration(labelText: 'Email'),
-            ),
-            TextFormField(
-              controller: _phoneController,
-              decoration: InputDecoration(labelText: 'Teléfono'),
-              validator: (value) => value?.isEmpty ?? true ? 'Campo requerido' : null,
-            ),
-            TextFormField(
-              controller: _imageUrlController,
-              decoration: InputDecoration(labelText: 'URL de imagen'),
-            ),
-            DropdownButtonFormField<String>(
-              value: _selectedCategory,
-              items: ['Particular', 'Local'].map((String category) {
-                return DropdownMenuItem(
-                  value: category,
-                  child: Text(category),
-                );
-              }).toList(),
-              onChanged: (String? value) {
-                setState(() => _selectedCategory = value ?? 'Particular');
-              },
-              decoration: InputDecoration(labelText: 'Categoría'),
-            ),
-            TextFormField(
-              controller: _descriptionController,
-              decoration: InputDecoration(labelText: 'Descripción'),
-            ),
+            _buildTextField(_nameController, 'Nombre', true),
+            SizedBox(height: 16),
+            _buildTextField(_emailController, 'Email', false),
+            SizedBox(height: 16),
+            _buildTextField(_phoneController, 'Teléfono', true),
+            SizedBox(height: 16),
+            _buildTextField(_imageUrlController, 'URL de imagen', false),
+            SizedBox(height: 16),
+            _buildCategoryDropdown(),
+            SizedBox(height: 16),
+            _buildDescriptionField(),
             SizedBox(height: 16.0),
             _buildAreaSelector(),
-            SizedBox(height: 8.0),
-            SwitchListTile(
-              title: Text('Disponible'),
-              activeColor: Color(0xFFD4451A),
-              value: _isAvailable,
-              onChanged: (bool value) {
-                setState(() => _isAvailable = value);
-              },
-            ),
-            SizedBox(height: 8.0),
-            ElevatedButton(
-              onPressed: _saveWorker,
-              child: Text('Guardar'),
-              style: TextButton.styleFrom(
-                backgroundColor: const Color(0xFFD4451A),
-                foregroundColor: Colors.white,
-              ),
-            ),
+            SizedBox(height: 16.0),
+            _buildAvailabilitySwitch(),
+            SizedBox(height: 24.0),
+            _buildSubmitButton(),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildTextField(TextEditingController controller, String label, bool required) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(),
+      ),
+      validator: required ? (value) => value?.isEmpty ?? true ? 'Campo requerido' : null : null,
+    );
+  }
+
+  Widget _buildCategoryDropdown() {
+    return DropdownButtonFormField<String>(
+      value: _selectedCategory,
+      decoration: InputDecoration(
+        labelText: 'Categoría',
+        border: OutlineInputBorder(),
+      ),
+      items: ['Particular', 'Local'].map((String category) {
+        return DropdownMenuItem(
+          value: category,
+          child: Text(category),
+        );
+      }).toList(),
+      onChanged: (String? value) {
+        setState(() => _selectedCategory = value ?? 'Particular');
+      },
+    );
+  }
+
+  Widget _buildDescriptionField() {
+    return TextFormField(
+      controller: _descriptionController,
+      decoration: InputDecoration(
+        labelText: 'Descripción',
+        border: OutlineInputBorder(),
+      ),
+      maxLines: 6,
+    );
+  }
+
+  Widget _buildAvailabilitySwitch() {
+    return Card(
+      child: SwitchListTile(
+        title: Text('Disponible'),
+        value: _isAvailable,
+        onChanged: (value) => setState(() => _isAvailable = value),
+      ),
+    );
+  }
+
+  Widget _buildSubmitButton() {
+    return ElevatedButton(
+      onPressed: _saveWorker,
+      child: Text('Guardar'),
+      style: ElevatedButton.styleFrom(
+        minimumSize: Size(double.infinity, 50),
       ),
     );
   }
