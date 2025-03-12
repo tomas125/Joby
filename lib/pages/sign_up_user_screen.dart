@@ -147,7 +147,7 @@ class _SignUpUserScreenState extends State<SignUpUserScreen> {
             child: Text(
               'Continuar con Google',
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 15,
                 fontWeight: FontWeight.bold,
                 color: AppStyles.textDarkColor,
                 letterSpacing: 0.3,
