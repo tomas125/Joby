@@ -4,8 +4,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../widgets/help_button.dart';
 import '../utils/app_styles.dart';
 
-class SignUpWorkerScreen extends StatelessWidget {
-  const SignUpWorkerScreen({Key? key}) : super(key: key);
+class SignUpWorkerScreenOld extends StatelessWidget {
+  const SignUpWorkerScreenOld({Key? key}) : super(key: key);
 
   void _launchWhatsApp(BuildContext context) async {
     const phoneNumber = '+5493364179227';

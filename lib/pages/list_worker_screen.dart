@@ -114,22 +114,23 @@ class _ListWorkerScreenState extends State<ListWorkerScreen> {
         highlightColor: Colors.white.withOpacity(0.1),
         onTap: () => setState(() => filterType = type),
         child: Ink(
-          decoration: BoxDecoration(
-            color: isSelected ? Colors.white : AppStyles.textDarkColor,
-            gradient: isSelected ? null : null,
-            borderRadius: BorderRadius.circular(10),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 4.0,
-                offset: Offset(0, 2),
-              ),
-            ],
-            border: Border.all(
-              color: Colors.white.withOpacity(0.3),
-              width: 1.0,
-            ),
-          ),
+          decoration: isSelected 
+              ? AppStyles.commonDecoration(borderRadius: 10.0)
+              : BoxDecoration(
+                  color: AppStyles.textDarkColor,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 4.0,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.3),
+                    width: 1.0,
+                  ),
+                ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(

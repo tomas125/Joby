@@ -41,20 +41,38 @@ class UpdateChecker {
       }
     } catch (e) {
       print('Error checking updates: $e');
+      // Don't show error to user, just log it
     }
   }
   
   static bool _isVersionNewer(String currentVersion, String latestVersion) {
-    List<int> current = currentVersion.split('.').map(int.parse).toList();
-    List<int> latest = latestVersion.split('.').map(int.parse).toList();
-    
-    for (int i = 0; i < latest.length; i++) {
-      if (i >= current.length) return true;
-      if (latest[i] > current[i]) return true;
-      if (latest[i] < current[i]) return false;
+    try {
+      // Validate version strings
+      if (!_isValidVersion(currentVersion) || !_isValidVersion(latestVersion)) {
+        print('Invalid version format: current=$currentVersion, latest=$latestVersion');
+        return false;
+      }
+
+      List<int> current = currentVersion.split('.').map(int.parse).toList();
+      List<int> latest = latestVersion.split('.').map(int.parse).toList();
+      
+      for (int i = 0; i < latest.length; i++) {
+        if (i >= current.length) return true;
+        if (latest[i] > current[i]) return true;
+        if (latest[i] < current[i]) return false;
+      }
+      
+      return false;
+    } catch (e) {
+      print('Error comparing versions: $e');
+      return false;
     }
-    
-    return false;
+  }
+
+  static bool _isValidVersion(String version) {
+    // Version should be in format x.y.z where x, y, z are numbers
+    final RegExp versionRegex = RegExp(r'^\d+(\.\d+)*$');
+    return versionRegex.hasMatch(version);
   }
   
   static void _showUpdateDialog(BuildContext context, bool forceUpdate) {

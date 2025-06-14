@@ -6,26 +6,121 @@ class HomeScreen extends StatelessWidget {
   Future<bool> _onWillPop(BuildContext context) async {
     final shouldPop = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Saliendo de la aplicación'),
-        content: Text('¿Estás seguro que deseas salir?'),
-        actions: [
-          TextButton(
-            child: Text('No'),
-            style: TextButton.styleFrom(
-              foregroundColor: AppStyles.textDarkColor,
-            ),
-            onPressed: () => Navigator.of(context).pop(false),
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        child: Container(
+          padding: EdgeInsets.all(20),
+          decoration: AppStyles.commonDecoration(borderRadius: 20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Saliendo de la aplicación',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppStyles.textDarkColor,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 16),
+              Text(
+                '¿Estás seguro que deseas salir?',
+                style: TextStyle(
+                  color: AppStyles.textDarkColor,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(25),
+                      splashColor: AppStyles.primaryColor.withOpacity(0.2),
+                      highlightColor: Colors.white.withOpacity(0.1),
+                      onTap: () => Navigator.of(context).pop(false),
+                      child: Ink(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              AppStyles.textDarkColor.withOpacity(0.9),
+                              AppStyles.textDarkColor,
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(25),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 4.0,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                          child: Text(
+                            'No',
+                            style: TextStyle(
+                              color: AppStyles.textLightColor,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(25),
+                      splashColor: AppStyles.primaryColor.withOpacity(0.2),
+                      highlightColor: Colors.white.withOpacity(0.1),
+                      onTap: () => Navigator.of(context).pop(true),
+                      child: Ink(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              AppStyles.primaryColor.withOpacity(0.9),
+                              AppStyles.primaryColor,
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(25),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 4.0,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                          child: Text(
+                            'Sí',
+                            style: TextStyle(
+                              color: AppStyles.textLightColor,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          TextButton(
-            child: Text('Sí'),
-            style: TextButton.styleFrom(
-              backgroundColor: AppStyles.primaryColor,
-              foregroundColor: Colors.white,
-            ),
-            onPressed: () => Navigator.of(context).pop(true),
-          ),
-        ],
+        ),
       ),
     ) ?? false;
 

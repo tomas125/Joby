@@ -154,13 +154,31 @@ class _LoginScreenState extends State<LoginScreen> {
     if (_formKey.currentState?.validate() ?? false) {
       developer.log('Formulario validado correctamente');
 
+      // Validar que los campos no estén vacíos
+      if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+        SnackBarUtil.showError(
+          context: context,
+          message: 'Por favor, complete todos los campos',
+        );
+        return;
+      }
+
+      // Mostrar indicador de carga
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => Center(child: CircularProgressIndicator()),
+      );
+
       try {
-        developer.log(
-            'Intentando iniciar sesión con email: ${_emailController.text}');
+        developer.log('Intentando iniciar sesión con email: ${_emailController.text}');
         var result = await _auth.signInWithEmailAndPassword(
-          _emailController.text,
+          _emailController.text.trim(),
           _passwordController.text,
         );
+
+        // Cerrar el diálogo de carga
+        Navigator.pop(context);
 
         developer.log('Resultado de inicio de sesión: ${result.toString()}');
 
@@ -168,12 +186,10 @@ class _LoginScreenState extends State<LoginScreen> {
           await UserPreference.setLoggedIn(true);
           await UserPreference.setUserEmail(_emailController.text);
           if(await AuthService().isAdmin()) {
-            developer
-              .log('Inicio de sesión exitoso, navegando a /admin/home');
+            developer.log('Inicio de sesión exitoso, navegando a /admin/home');
             Navigator.pushReplacementNamed(context, '/admin/home');
           } else {
-            developer
-              .log('Inicio de sesión exitoso, navegando a /list/areas');
+            developer.log('Inicio de sesión exitoso, navegando a /list/areas');
             Navigator.pushReplacementNamed(context, '/list/areas');
           }
         } else {
@@ -184,6 +200,11 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         }
       } catch (e) {
+        // Cerrar el diálogo de carga si está abierto
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context);
+        }
+        
         developer.log('Excepción durante el inicio de sesión: $e');
         SnackBarUtil.showError(
           context: context,

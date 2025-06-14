@@ -25,8 +25,9 @@ class _WorkerFormAdminScreenState extends State<WorkerFormAdminScreen> {
   late TextEditingController _descriptionController;
   late TextEditingController _phoneController;
   late TextEditingController _emailController;
+  late TextEditingController _documentController;
   String _selectedCategory = 'Particular';
-  double _rating = 0.0;
+  String _selectedStatus = 'approved'; // Default to approved for admin-created workers
   bool _isAvailable = true;
 
   @override
@@ -37,8 +38,9 @@ class _WorkerFormAdminScreenState extends State<WorkerFormAdminScreen> {
     _descriptionController = TextEditingController(text: widget.worker?.description ?? '');
     _phoneController = TextEditingController(text: widget.worker?.phone ?? '');
     _emailController = TextEditingController(text: widget.worker?.email ?? '');
+    _documentController = TextEditingController(text: widget.worker?.document ?? '');
     _selectedCategory = widget.worker?.category ?? 'Particular';
-    _rating = widget.worker?.rating ?? 0.0;
+    _selectedStatus = widget.worker?.status ?? 'approved';
     _isAvailable = widget.worker?.isAvailable ?? true;
     
     if (widget.worker != null) {
@@ -65,9 +67,13 @@ class _WorkerFormAdminScreenState extends State<WorkerFormAdminScreen> {
             SizedBox(height: 16),
             _buildTextField(_phoneController, 'Teléfono', true),
             SizedBox(height: 16),
+            _buildTextField(_documentController, 'CUIL/CUIT', false),
+            SizedBox(height: 16),
             _buildTextField(_imageUrlController, 'URL de imagen', false),
             SizedBox(height: 16),
             _buildCategoryDropdown(),
+            SizedBox(height: 16),
+            _buildStatusDropdown(),
             SizedBox(height: 16),
             _buildDescriptionField(),
             SizedBox(height: 16.0),
@@ -108,6 +114,29 @@ class _WorkerFormAdminScreenState extends State<WorkerFormAdminScreen> {
       }).toList(),
       onChanged: (String? value) {
         setState(() => _selectedCategory = value ?? 'Particular');
+      },
+    );
+  }
+
+  Widget _buildStatusDropdown() {
+    return DropdownButtonFormField<String>(
+      value: _selectedStatus,
+      decoration: InputDecoration(
+        labelText: 'Estado',
+        border: OutlineInputBorder(),
+      ),
+      items: ['pending', 'approved', 'rejected'].map((String status) {
+        return DropdownMenuItem(
+          value: status,
+          child: Text(status == 'pending' 
+              ? 'Pendiente' 
+              : status == 'approved' 
+                  ? 'Aprobado' 
+                  : 'Rechazado'),
+        );
+      }).toList(),
+      onChanged: (String? value) {
+        setState(() => _selectedStatus = value ?? 'approved');
       },
     );
   }
@@ -188,7 +217,6 @@ class _WorkerFormAdminScreenState extends State<WorkerFormAdminScreen> {
         id: widget.worker?.id ?? '',
         name: _nameController.text,
         imageUrl: _imageUrlController.text,
-        rating: _rating,
         description: _descriptionController.text,
         phone: _phoneController.text,
         email: _emailController.text,
@@ -196,6 +224,12 @@ class _WorkerFormAdminScreenState extends State<WorkerFormAdminScreen> {
         areaIds: _selectedAreaIds,
         location: const GeoPoint(0, 0),
         isAvailable: _isAvailable,
+        status: _selectedStatus,
+        document: _documentController.text,
+        createdAt: widget.worker?.createdAt ?? DateTime.now(),
+        processedAt: widget.worker?.processedAt ?? (_selectedStatus != 'pending' ? DateTime.now() : null),
+        approvedBy: widget.worker?.approvedBy ?? (_selectedStatus == 'approved' ? 'admin' : null),
+        rejectionReason: widget.worker?.rejectionReason,
       );
 
       try {
@@ -220,6 +254,7 @@ class _WorkerFormAdminScreenState extends State<WorkerFormAdminScreen> {
     _descriptionController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
+    _documentController.dispose();
     super.dispose();
   }
 } 

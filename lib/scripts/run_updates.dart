@@ -22,8 +22,8 @@ Future<void> main() async {
 
     final updates = FirebaseUpdates();
     
-    // Ejecutar solo la actualización de anuncios
-    await updates.updateAdvertisementsWithNewFields();
+    // Ejecutar solo la actualización de trabajadores
+    await updates.updateWorkersStatus();
     
     // O ejecutar todas las actualizaciones
     // await updates.runAllUpdates();

@@ -297,4 +297,55 @@ class FirebaseUpdates {
       print('Error verificando tipos de datos: $e');
     }
   }
+
+  Future<void> updateWorkersStatus() async {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final workersRef = _firestore.collection('workers');
+
+  try {
+    // Obtener todos los trabajadores existentes
+    final snapshot = await workersRef.get();
+    
+    // Contador para seguimiento
+    int updatedCount = 0;
+    int errorCount = 0;
+
+    // Actualizar cada documento
+    for (var doc in snapshot.docs) {
+      try {
+        final data = doc.data();
+        
+        // Verificar si el documento ya tiene los campos necesarios
+        if (!data.containsKey('status') || 
+            !data.containsKey('rejectionReason') || 
+            !data.containsKey('approvedBy') || 
+            !data.containsKey('processedAt')) {
+          
+          // Actualizar el documento con los nuevos campos
+          await doc.reference.update({
+            'status': 'approved', // Asumimos que los trabajadores existentes están aprobados
+            'rejectionReason': null,
+            'approvedBy': 'system',
+            'processedAt': FieldValue.serverTimestamp(),
+          });
+          
+          updatedCount++;
+          print('Documento ${doc.id} actualizado exitosamente');
+        }
+      } catch (e) {
+        errorCount++;
+        print('Error al actualizar documento ${doc.id}: $e');
+      }
+    }
+
+    print('\nResumen de la actualización:');
+    print('Documentos actualizados: $updatedCount');
+    print('Errores: $errorCount');
+    print('Total de documentos procesados: ${snapshot.docs.length}');
+
+  } catch (e) {
+      print('Error general: $e');
+    }
+  }
+
 } 

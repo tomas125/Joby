@@ -1,4 +1,4 @@
-import 'package:Joby/pages/sign_up_worker.dart';
+import 'package:Joby/pages/sign_up_worker_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'utils/firebase_config.dart';
@@ -16,21 +16,66 @@ import 'pages/admin/advertisement_form_screen.dart';
 import 'utils/auth.dart';
 import 'models/worker_model.dart';
 import 'utils/update_checker.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  try {
+    await dotenv.load(fileName: ".env");
+    print('Environment variables loaded successfully');
+  } catch (e) {
+    print('Error loading environment variables: $e');
+    // Continue execution as this might not be critical
+  }
+  
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+    print('Firebase initialized successfully');
   } catch (e) {
     if (e.toString().contains('duplicate-app')) {
-      print('Firebase iniatilized already');
+      print('Firebase already initialized');
     } else {
-      rethrow;
+      print('Error initializing Firebase: $e');
+      // Show error UI instead of crashing
+      runApp(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                  const SizedBox(height: 16),
+                  Text('Error initializing app: $e'),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      // Attempt to restart the app
+                      main();
+                    },
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      return;
     }
   }
-  await UserPreference.init();
+
+  try {
+    await UserPreference.init();
+    print('User preferences initialized successfully');
+  } catch (e) {
+    print('Error initializing user preferences: $e');
+    // Continue execution as this might not be critical
+  }
+
   runApp(const MyApp());
 }
 
@@ -100,6 +145,7 @@ class MyApp extends StatelessWidget {
         '/admin/form/worker': (context) => WorkerFormAdminScreen(),
         '/admin/form/area': (context) => AreaFormAdminScreen(),
         '/admin/form/advertisement': (context) => AdvertisementFormScreen(),
+        '/sign_up_worker_screen': (context) => const SignUpWorkerScreen(),
       },
       onGenerateRoute: _generateRoute,
     );

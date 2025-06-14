@@ -7,12 +7,17 @@ class AreaService {
 
   Stream<List<AreaModel>> getAreas() {
     return _areasCollection.snapshots().map((snapshot) {
-      return snapshot.docs.map((doc) {
+      List<AreaModel> areas = snapshot.docs.map((doc) {
         return AreaModel.fromMap(
           doc.data() as Map<String, dynamic>, 
           doc.id
         );
       }).toList();
+      
+      // Ordenar alfabéticamente por nombre
+      areas.sort((a, b) => a.name.compareTo(b.name));
+      
+      return areas;
     });
   }
 

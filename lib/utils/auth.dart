@@ -58,7 +58,14 @@ class AuthService {
     } on FirebaseAuthException catch (e) {
       return _handleFirebaseAuthException(e);
     } catch (e) {
-      return AuthResult(success: false, errorMessage: e.toString());
+      // Manejar específicamente el error de FirebaseAuthHostApi
+      if (e.toString().contains('FirebaseAuthHostApi')) {
+        return AuthResult(
+          success: false,
+          errorMessage: 'Error de conexión con Firebase. Por favor, verifica tu conexión a internet e intenta nuevamente.'
+        );
+      }
+      return AuthResult(success: false, errorMessage: 'Error inesperado: ${e.toString()}');
     }
   }
 
