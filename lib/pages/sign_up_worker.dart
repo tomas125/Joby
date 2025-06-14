@@ -1,4 +1,4 @@
-import 'package:Joby/utils/snackbar.dart';
+import 'package:joby/utils/snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../widgets/help_button.dart';
@@ -9,7 +9,7 @@ class SignUpWorkerScreenOld extends StatelessWidget {
 
   void _launchWhatsApp(BuildContext context) async {
     const phoneNumber = '+5493364179227';
-    const message = 'Hola, estoy interesado en formar parte del equipo de trabajadores de Joby. ¿Podrías brindarme más información? ¡Gracias!';
+    const message = 'Hola, estoy interesado en formar parte del equipo de trabajadores de joby. ¿Podrías brindarme más información? ¡Gracias!';
     
     final whatsappUrl = Uri.parse(
         'whatsapp://send?phone=$phoneNumber&text=${Uri.encodeFull(message)}');

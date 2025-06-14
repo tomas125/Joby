@@ -1,6 +1,6 @@
-import 'package:Joby/utils/auth.dart';
+import 'package:joby/utils/auth.dart';
 import 'package:flutter/material.dart';
-import 'package:Joby/preferences/pref_user.dart';
+import 'package:joby/preferences/pref_user.dart';
 import 'dart:async';
 import '../services/area_service.dart';
 import '../models/area_model.dart';
@@ -11,7 +11,7 @@ import 'package:flutter/foundation.dart';
 import '../widgets/help_button.dart';
 import 'package:carousel_slider/carousel_slider.dart' as carousel;
 import 'package:url_launcher/url_launcher.dart';
-import 'package:Joby/utils/app_styles.dart';
+import 'package:joby/utils/app_styles.dart';
 class ListAreaScreen extends StatefulWidget {
   static const String routeName = '/list_area';
 
@@ -838,7 +838,7 @@ class _ListAreaScreenState extends State<ListAreaScreen> {
     }
     
     // Mensaje predeterminado
-    final String message = 'Hola, vi tu anuncio en la aplicación Joby. Me gustaría obtener más información.';
+    final String message = 'Hola, vi tu anuncio en la aplicación joby. Me gustaría obtener más información.';
     
     try {
       // Intentar primero con la URL de la aplicación nativa

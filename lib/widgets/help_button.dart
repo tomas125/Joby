@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:Joby/utils/snackbar.dart';
+import 'package:joby/utils/snackbar.dart';
 
 class HelpButton extends StatelessWidget {
   const HelpButton({Key? key}) : super(key: key);
 
   void _launchWhatsAppHelp(BuildContext context) async {
     const phoneNumber = '+5493364179227';
-    const message = 'Hola, necesito asistencia con la aplicación Joby. ¿Podrían ayudarme?';
+    const message = 'Hola, necesito asistencia con la aplicación joby. ¿Podrían ayudarme?';
     
     final whatsappUrl = Uri.parse(
         'whatsapp://send?phone=$phoneNumber&text=${Uri.encodeFull(message)}');

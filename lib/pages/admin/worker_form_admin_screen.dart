@@ -1,4 +1,4 @@
-import 'package:Joby/models/area_model.dart';
+import 'package:joby/models/area_model.dart';
 import 'package:flutter/material.dart';
 import '../../models/worker_model.dart';
 import '../../services/worker_service.dart';

@@ -1,4 +1,4 @@
-import 'package:Joby/utils/snackbar.dart';
+import 'package:joby/utils/snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/worker_model.dart';
@@ -383,7 +383,7 @@ class ProfileWorkerScreen extends StatelessWidget {
     }
 
     final String phoneNumber = worker.phone;
-    final String message = 'Hola, me estoy contactando a través de la aplicación Joby. Estoy interesado en contratar tus servicios. ¿Podrías proporcionarme más información sobre tu disponibilidad y tarifas? ¡Gracias!';
+    final String message = 'Hola, me estoy contactando a través de la aplicación joby. Estoy interesado en contratar tus servicios. ¿Podrías proporcionarme más información sobre tu disponibilidad y tarifas? ¡Gracias!';
     
     try {
       // Crear el registro del trabajo

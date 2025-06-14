@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:Joby/utils/snackbar.dart';
-import 'package:Joby/utils/auth.dart';
+import 'package:joby/utils/snackbar.dart';
+import 'package:joby/utils/auth.dart';
 import '../utils/app_styles.dart';
 
 import 'dart:developer' as developer;
 
-import 'package:Joby/preferences/pref_user.dart';
+import 'package:joby/preferences/pref_user.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../widgets/help_button.dart';
 

@@ -1,6 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/widgets.dart';
-import 'package:Joby/utils/firebase_config.dart';
+import 'package:joby/utils/firebase_config.dart';
 import 'firebase_updates.dart';
 
 Future<void> main() async {

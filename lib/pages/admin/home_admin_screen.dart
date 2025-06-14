@@ -1,5 +1,5 @@
-import 'package:Joby/preferences/pref_user.dart';
-import 'package:Joby/utils/auth.dart';
+import 'package:joby/preferences/pref_user.dart';
+import 'package:joby/utils/auth.dart';
 import 'package:flutter/material.dart';
 import '../../models/worker_model.dart';
 import '../../services/worker_service.dart';
